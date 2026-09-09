@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <circle cx="100" cy="100" r="95" stroke="#C5A880" stroke-width="1" stroke-dasharray="3 3" opacity="0.4"/>
+  <circle cx="100" cy="100" r="88" stroke="#E6D7C3" stroke-width="1" opacity="0.6"/>
+  <circle cx="100" cy="100" r="80" stroke="#C5A880" stroke-width="0.5" opacity="0.3"/>
+  <path d="M100 35 L102 45 L112 47 L102 49 L100 59 L98 49 L88 47 L98 45 Z" fill="#C5A880" opacity="0.8"/>
+  <text x="100" y="108" font-family="'Cormorant Garamond', serif" font-size="28" font-weight="400" fill="#F7F5F0" letter-spacing="4" text-anchor="middle">STYLEORA</text>
+  <text x="100" y="126" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" font-weight="600" fill="#C5A880" letter-spacing="3" text-anchor="middle">ATELIER ARCHITECTURE</text>
+  <path d="M70 142 H130" stroke="#C5A880" stroke-width="0.75" opacity="0.5"/>
+</svg>

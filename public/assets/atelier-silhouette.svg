@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 560" fill="none">
+  <rect width="400" height="560" fill="#161618"/>
+  <!-- Subtle Background Grid -->
+  <line x1="40" y1="0" x2="40" y2="560" stroke="#E6D7C3" stroke-width="0.5" opacity="0.08"/>
+  <line x1="200" y1="0" x2="200" y2="560" stroke="#C5A880" stroke-width="0.75" stroke-dasharray="4 4" opacity="0.2"/>
+  <line x1="360" y1="0" x2="360" y2="560" stroke="#E6D7C3" stroke-width="0.5" opacity="0.08"/>
+  <line x1="0" y1="120" x2="400" y2="120" stroke="#E6D7C3" stroke-width="0.5" opacity="0.08"/>
+  <line x1="0" y1="240" x2="400" y2="240" stroke="#C5A880" stroke-width="0.5" opacity="0.15"/>
+  <line x1="0" y1="360" x2="400" y2="360" stroke="#E6D7C3" stroke-width="0.5" opacity="0.08"/>
+  <line x1="0" y1="480" x2="400" y2="480" stroke="#E6D7C3" stroke-width="0.5" opacity="0.08"/>
+  
+  <!-- Architectural Silhouette Silhouette Line Art -->
+  <path d="M185 85 C185 70 215 70 215 85 C215 98 185 98 185 85 Z" stroke="#E6D7C3" stroke-width="1.2" fill="none" opacity="0.7"/>
+  <path d="M190 102 L150 135 L165 240 L180 340 L175 480 M210 102 L250 135 L235 240 L220 340 L225 480" stroke="#C5A880" stroke-width="1.2" fill="none" opacity="0.8"/>
+  <path d="M150 135 C175 145 225 145 250 135" stroke="#E6D7C3" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M165 240 C185 246 215 246 235 240" stroke="#E6D7C3" stroke-width="0.8" fill="none" opacity="0.5"/>
+  <path d="M180 340 C190 344 210 344 220 340" stroke="#E6D7C3" stroke-width="0.8" fill="none" opacity="0.5"/>
+  
+  <!-- Proportion Callouts -->
+  <circle cx="200" cy="135" r="2" fill="#E6D7C3"/>
+  <text x="265" y="138" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8E8D8A" letter-spacing="1.5">SHOULDER AXIS • 1.618</text>
+  <circle cx="200" cy="240" r="2" fill="#E6D7C3"/>
+  <text x="250" y="243" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8E8D8A" letter-spacing="1.5">WAIST ELEVATION</text>
+  <circle cx="200" cy="340" r="2" fill="#E6D7C3"/>
+  <text x="235" y="343" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#8E8D8A" letter-spacing="1.5">HIP APEX</text>
+  
+  <!-- Outer Editorial Frame -->
+  <rect x="15" y="15" width="370" height="530" stroke="#E6D7C3" stroke-width="0.75" opacity="0.12"/>
+  <text x="30" y="525" font-family="'Cormorant Garamond', serif" font-size="12" fill="#E6D7C3" opacity="0.6">FIGURE PROPORTION MAPPING — SPEC. 01</text>
+</svg>

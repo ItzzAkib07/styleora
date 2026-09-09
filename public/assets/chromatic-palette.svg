@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" fill="none">
+  <rect width="400" height="300" fill="#161618"/>
+  <rect x="25" y="25" width="350" height="250" stroke="#E6D7C3" stroke-width="0.75" opacity="0.15"/>
+  
+  <!-- Swatch 1: Obsidian Noir -->
+  <rect x="50" y="55" width="80" height="110" fill="#0B0B0C" stroke="#E6D7C3" stroke-width="0.5" opacity="0.9"/>
+  <text x="50" y="185" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#F7F5F0" font-weight="600">OBSIDIAN</text>
+  <text x="50" y="197" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" fill="#8E8D8A">BASE NOIR</text>
+  
+  <!-- Swatch 2: Warm Ivory -->
+  <rect x="150" y="55" width="80" height="110" fill="#F7F5F0" stroke="#E6D7C3" stroke-width="0.5"/>
+  <text x="150" y="185" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#F7F5F0" font-weight="600">WARM IVORY</text>
+  <text x="150" y="197" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" fill="#8E8D8A">SURFACE LIGHT</text>
+  
+  <!-- Swatch 3: Muted Gold -->
+  <rect x="250" y="55" width="80" height="110" fill="#C5A880" stroke="#E6D7C3" stroke-width="0.5"/>
+  <text x="250" y="185" font-family="'Plus Jakarta Sans', sans-serif" font-size="8" fill="#F7F5F0" font-weight="600">MUTED GOLD</text>
+  <text x="250" y="197" font-family="'Plus Jakarta Sans', sans-serif" font-size="7" fill="#8E8D8A">KEY ACCENT</text>
+  
+  <!-- Technical Data Line -->
+  <line x1="50" y1="225" x2="330" y2="225" stroke="#E6D7C3" stroke-width="0.5" opacity="0.15"/>
+  <text x="50" y="245" font-family="'Cormorant Garamond', serif" font-size="12" fill="#E6D7C3" opacity="0.7">STYLEORA CHROMATIC HARMONY INDEX — SYSTEM III</text>
+</svg>

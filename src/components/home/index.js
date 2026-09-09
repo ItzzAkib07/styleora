@@ -1,0 +1,10 @@
+export { HeroSection } from './HeroSection';
+export { BrandPositioningSection } from './BrandPositioningSection';
+export { HowItWorksSection } from './HowItWorksSection';
+export { DimensionsSection } from './DimensionsSection';
+export { BlueprintDeliverableSection } from './BlueprintDeliverableSection';
+export { StylistAtelierSection } from './StylistAtelierSection';
+export { PackagesSection } from './PackagesSection';
+export { AtelierSculptureSection } from './AtelierSculptureSection';
+export { HomeFaqSection } from './HomeFaqSection';
+export { ConsultationCtaSection } from './ConsultationCtaSection';

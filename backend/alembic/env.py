@@ -1,0 +1,71 @@
+import asyncio
+from logging.config import fileConfig
+import os
+import sys
+from alembic import context
+from sqlalchemy import pool
+from sqlalchemy.engine import Connection
+from sqlalchemy.ext.asyncio import create_async_engine
+
+# Append root to path
+sys.path.insert(0, os.path.realpath(os.path.join(os.path.dirname(__file__), "..")))
+
+from app.config.settings import get_settings
+from app.db.base import Base
+from app.db.session import normalize_database_url
+import app.models  # Ensure all models are registered
+
+# Alembic Config object
+config = context.config
+
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+target_metadata = Base.metadata
+
+settings = get_settings()
+normalized_url, db_connect_args = normalize_database_url(settings.DATABASE_URL)
+
+config.set_main_option("sqlalchemy.url", normalized_url.replace("%", "%%"))
+
+
+def run_migrations_offline() -> None:
+    context.configure(
+        url=normalized_url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def do_run_migrations(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+async def run_async_migrations() -> None:
+    connectable = create_async_engine(
+        normalized_url,
+        poolclass=pool.NullPool,
+        connect_args=db_connect_args,
+    )
+
+    async with connectable.connect() as connection:
+        await connection.run_sync(do_run_migrations)
+
+    await connectable.dispose()
+
+
+def run_migrations_online() -> None:
+    asyncio.run(run_async_migrations())
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
