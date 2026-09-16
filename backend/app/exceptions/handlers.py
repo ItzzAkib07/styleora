@@ -6,6 +6,11 @@ from app.core.logging import logger, request_id_ctx
 from app.schemas.response import APIErrorDetails, APIResponse
 
 
+from slowapi.errors import RateLimitExceeded
+
+HTTP_422 = getattr(status, "HTTP_422_UNPROCESSABLE_CONTENT", 422)
+
+
 class StyleoraException(Exception):
     def __init__(self, message: str, code: str = "INTERNAL_ERROR", status_code: int = status.HTTP_500_INTERNAL_SERVER_ERROR, details: any = None):
         self.message = message
@@ -22,7 +27,7 @@ class NotFoundException(StyleoraException):
 
 class ValidationException(StyleoraException):
     def __init__(self, message: str = "Validation failed", details: any = None):
-        super().__init__(message=message, code="VALIDATION_ERROR", status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, details=details)
+        super().__init__(message=message, code="VALIDATION_ERROR", status_code=HTTP_422, details=details)
 
 
 class DuplicateException(StyleoraException):
@@ -30,7 +35,32 @@ class DuplicateException(StyleoraException):
         super().__init__(message=message, code=code, status_code=status.HTTP_409_CONFLICT)
 
 
+class ConflictException(StyleoraException):
+    def __init__(self, message: str = "Request conflict", code: str = "IDEMPOTENCY_CONFLICT", details: any = None):
+        super().__init__(message=message, code=code, status_code=status.HTTP_409_CONFLICT, details=details)
+
+
 def register_exception_handlers(app: FastAPI) -> None:
+    @app.exception_handler(RateLimitExceeded)
+    async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
+        req_id = request_id_ctx.get()
+        logger.warning(
+            f"Rate limit exceeded [Ref: {req_id}]: {exc.detail}",
+            extra={"extra_data": {"client_ip": request.client.host if request.client else "unknown"}},
+        )
+        return JSONResponse(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            content=APIResponse(
+                success=False,
+                error=APIErrorDetails(
+                    code="RATE_LIMIT_EXCEEDED",
+                    message="Too many requests submitted. Please pause and try again shortly.",
+                    reference_id=req_id,
+                ),
+            ).model_dump(exclude_none=True),
+            headers={"Retry-After": "60"},
+        )
+
     @app.exception_handler(StyleoraException)
     async def styleora_exception_handler(request: Request, exc: StyleoraException):
         req_id = request_id_ctx.get()
@@ -56,7 +86,7 @@ def register_exception_handlers(app: FastAPI) -> None:
             errors.append({"field": loc, "message": err.get("msg")})
 
         return JSONResponse(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=HTTP_422,
             content=APIResponse(
                 success=False,
                 error=APIErrorDetails(

@@ -44,12 +44,13 @@ class Settings(BaseSettings):
     RATE_LIMIT_DEFAULT: str = "100/minute"
     RATE_LIMIT_STORAGE_URL: str = "memory://"
 
-    # Placeholder keys for subsequent sub-modules (1.5 & 1.6)
+    # Razorpay Test Mode Configuration
+    RAZORPAY_MODE: str = Field(default="test")
     RAZORPAY_KEY_ID: str = Field(default="")
     RAZORPAY_KEY_SECRET: str = Field(default="")
     RAZORPAY_WEBHOOK_SECRET: str = Field(default="")
     RESEND_API_KEY: str = Field(default="")
-    ADMIN_EMAIL: str = Field(default="atelier@styleora.luxury")
+    ADMIN_EMAIL: str = Field(default="hello@styleora.me")
 
     @property
     def is_production(self) -> bool:
@@ -74,3 +75,7 @@ class Settings(BaseSettings):
 @lru_cache()
 def get_settings() -> Settings:
     return Settings()
+
+
+settings: Settings = get_settings()
+

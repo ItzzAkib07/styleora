@@ -54,4 +54,11 @@ class Payment(Base, TimestampMixin):
 
     __table_args__ = (
         Index("ix_payments_provider_order", "provider", "provider_order_id"),
+        Index(
+            "uq_payments_consultation_success",
+            "consultation_id",
+            unique=True,
+            postgresql_where=(status == PaymentStatus.SUCCESS),
+            sqlite_where=(status == PaymentStatus.SUCCESS),
+        ),
     )

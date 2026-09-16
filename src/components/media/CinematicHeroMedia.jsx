@@ -1,18 +1,24 @@
 import React, { useRef, useEffect, useState } from 'react';
+import defaultHeroVideo from '@/assets/videos/hero-bg.mp4';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
 export const CinematicHeroMedia = ({
   poster = '/assets/atelier-silhouette.svg',
-  videoSrc = null,
+  videoSrc = defaultHeroVideo,
   className = '',
 }) => {
+  const activeVideoSrc = videoSrc ?? defaultHeroVideo;
   const prefersReducedMotion = usePrefersReducedMotion();
   const [videoError, setVideoError] = useState(false);
   const canvasRef = useRef(null);
 
+  useEffect(() => {
+    setVideoError(false);
+  }, [activeVideoSrc]);
+
   // Atmospheric luxury particle canvas fallback when video is absent or unsupported
   useEffect(() => {
-    if (videoSrc && !videoError) return;
+    if (activeVideoSrc && !videoError) return;
     if (prefersReducedMotion) return;
 
     const canvas = canvasRef.current;
@@ -75,7 +81,7 @@ export const CinematicHeroMedia = ({
 
   if (prefersReducedMotion) {
     return (
-      <div className={`relative overflow-hidden bg-charcoal ${className}`}>
+      <div className={`w-full h-full relative overflow-hidden bg-charcoal ${className}`}>
         <img
           src={poster}
           alt="STYLEORA Cinematic Composition"
@@ -87,8 +93,8 @@ export const CinematicHeroMedia = ({
   }
 
   return (
-    <div className={`relative overflow-hidden bg-obsidian ${className}`}>
-      {videoSrc && !videoError ? (
+    <div className={`w-full h-full relative overflow-hidden bg-obsidian ${className}`}>
+      {activeVideoSrc && !videoError ? (
         <video
           autoPlay
           loop
@@ -96,9 +102,13 @@ export const CinematicHeroMedia = ({
           playsInline
           poster={poster}
           onError={() => setVideoError(true)}
-          className="w-full h-full object-cover opacity-75"
+          className="w-full h-full object-cover opacity-95"
         >
-          <source src={videoSrc} type="video/mp4" />
+          <source
+            src={activeVideoSrc}
+            type={typeof activeVideoSrc === 'string' && activeVideoSrc.toLowerCase().includes('.mov') ? 'video/quicktime' : 'video/mp4'}
+          />
+          <source src={activeVideoSrc} />
         </video>
       ) : (
         <canvas ref={canvasRef} className="w-full h-full object-cover opacity-80" />

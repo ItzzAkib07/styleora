@@ -5,6 +5,7 @@ from sqlalchemy import text
 from app.config.settings import get_settings
 from app.core.logging import logger
 from app.db.session import engine
+from app.core.limiter import limiter
 from app.exceptions.handlers import register_exception_handlers
 from app.middleware.request_id import RequestIdMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
@@ -45,6 +46,9 @@ def create_application() -> FastAPI:
         openapi_url="/openapi.json" if not settings.is_production else None,
         lifespan=lifespan,
     )
+
+    # Attach Rate Limiter to application state
+    app.state.limiter = limiter
 
     # Register Exception Handlers
     register_exception_handlers(app)

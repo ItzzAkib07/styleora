@@ -60,7 +60,7 @@ export const RefundPolicyPage = () => {
                 5. Initiating a Refund or Reschedule
               </h3>
               <p>
-                To request a cancellation, refund, or date adjustment, email <span className="text-champagne font-medium">atelier@styleora.luxury</span> with your reservation identifier. Our concierge will attend to your request within one business day.
+                To request a cancellation, refund, or date adjustment, email <a href="mailto:hello@styleora.me" className="text-champagne font-medium hover:underline">hello@styleora.me</a> with your reservation identifier. Our concierge will attend to your request within one business day.
               </p>
             </section>
           </div>

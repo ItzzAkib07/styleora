@@ -30,22 +30,22 @@ export const FaqPage = () => {
     },
     {
       q: 'Do I need to show my entire wardrobe during the video call?',
-      a: 'No. You do not need to parade your closet on camera. The photographic intake captures what your stylist needs beforehand, allowing the live 90-minute session to focus purely on analysis, proportion principles, and chromatic testing.',
+      a: 'No. You do not need to parade your closet on camera. The intake captures what your stylist needs beforehand, allowing the 30-minute private consultation to focus on your style goals, proportion principles, lifestyle context, and chromatic direction.',
     },
   ];
 
   const deliverableFaqs = [
     {
       q: 'What format is the Styleora Blueprint delivered in?',
-      a: 'Your blueprint is delivered as an ultra-high-definition interactive digital dossier (PDF and mobile-optimized web document) containing your exact measurement guidelines, 30-piece capsule matrix, and digital chromatic swatch cards.',
+      a: 'Your blueprint is delivered as an ultra-high-definition interactive digital dossier containing your bespoke colour palette, facial framing recommendations, silhouette strategies, curated signature looks, and practical wardrobe advice.',
     },
     {
       q: 'Do you sell clothes directly or recommend specific stores?',
-      a: 'We never sell garments or hold inventory. Your dossier includes direct acquisition links across luxury and contemporary houses tailored to your budget, along with tailor-alteration specification sheets.',
+      a: 'We never sell garments or hold inventory. Our recommendations are objective, independent, and tailored to your lifestyle, proportions, and budget.',
     },
     {
-      q: 'How does the 30-Day Concierge window work?',
-      a: 'Clients on the Bespoke Capsule tier gain direct messaging access to their stylist for 30 days following dossier delivery. You can send photos of items from fitting rooms or ask fit questions before making acquisitions.',
+      q: 'Can I add specialized sessions for wardrobe detox or beauty?',
+      a: 'Yes. During consultation reservation, you can enhance your experience with optional add-on sessions: The Wardrobe Edit (₹1,499), The Shopping Edit (₹499), and The Beauty Atelier (₹1,499).',
     },
   ];
 

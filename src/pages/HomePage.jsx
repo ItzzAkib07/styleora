@@ -3,6 +3,7 @@ import { healthService } from '@/services/healthService';
 import {
   HeroSection,
   BrandPositioningSection,
+  StyleoraLookEdit,
   HowItWorksSection,
   DimensionsSection,
   AtelierSculptureSection,
@@ -48,6 +49,7 @@ export const HomePage = () => {
       <div className="flex flex-col">
         <HeroSection health={health} loading={loading} />
         <BrandPositioningSection />
+        <StyleoraLookEdit />
         <HowItWorksSection />
         <DimensionsSection />
         <AtelierSculptureSection />

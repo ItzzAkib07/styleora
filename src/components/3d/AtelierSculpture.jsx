@@ -19,7 +19,7 @@ export const AtelierSculpture = ({ className = '' }) => {
           loading="lazy"
         />
         <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center text-[0.65rem] text-stone tracking-editorial-ultra uppercase">
-          <span>STYLEORA ARCHITECTURE</span>
+          <span>COUTURE SILHOUETTE</span>
           <span>STATIC EDITION</span>
         </div>
       </div>
@@ -32,7 +32,7 @@ export const AtelierSculpture = ({ className = '' }) => {
         fallback={
           <div className="w-full h-full min-h-[320px] flex items-center justify-center bg-charcoal/50 border border-border-subtle">
             <span className="font-editorial text-xl text-muted-gold/60 animate-pulse">
-              Calibrating Atelier Geometry...
+              Sculpting Atelier Silhouette...
             </span>
           </div>
         }

@@ -30,9 +30,12 @@ export const ContactPage = () => {
               <h3 className="font-editorial text-2xl text-warm-ivory mb-2 font-normal">
                 Direct Concierge
               </h3>
-              <p className="text-champagne font-medium text-base mb-3 select-all">
-                atelier@styleora.luxury
-              </p>
+              <a
+                href="mailto:hello@styleora.me"
+                className="text-champagne font-medium text-base mb-3 select-all hover:text-champagne/80 hover:underline transition-colors inline-block"
+              >
+                hello@styleora.me
+              </a>
               <p className="text-stone text-xs sm:text-sm leading-relaxed font-light">
                 For consultation inquiries, reservation queries, private client coordination, and press inquiries.
               </p>

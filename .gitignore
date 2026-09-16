@@ -42,3 +42,5 @@ __pycache__/
 backend/.env
 backend/.env.*
 !backend/.env.example
+
+.vercel

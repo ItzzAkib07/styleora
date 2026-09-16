@@ -6,5 +6,6 @@ export { BlueprintDeliverableSection } from './BlueprintDeliverableSection';
 export { StylistAtelierSection } from './StylistAtelierSection';
 export { PackagesSection } from './PackagesSection';
 export { AtelierSculptureSection } from './AtelierSculptureSection';
+export { StyleoraLookEdit } from './StyleoraLookEdit';
 export { HomeFaqSection } from './HomeFaqSection';
 export { ConsultationCtaSection } from './ConsultationCtaSection';

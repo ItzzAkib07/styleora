@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import { DeveloperCredit } from '@/components/ui';
 
 export const Footer = () => {
   return (
@@ -54,9 +55,12 @@ export const Footer = () => {
               <h4 className="text-[0.75rem] tracking-editorial-ultra text-muted-gold uppercase mb-5 font-medium">
                 Private Concierge
               </h4>
-              <p className="text-sm text-champagne mb-2 font-medium select-all">
-                atelier@styleora.luxury
-              </p>
+              <a
+                href="mailto:hello@styleora.me"
+                className="text-sm text-champagne mb-2 font-medium select-all hover:text-champagne/80 hover:underline transition-colors inline-block"
+              >
+                hello@styleora.me
+              </a>
               <p className="text-sm text-stone leading-[1.6] mb-4 font-light">
                 Direct private styling consultations booked strictly by reservation.
               </p>
@@ -91,9 +95,9 @@ export const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 flex flex-wrap justify-between items-center gap-4 text-[0.78rem] text-stone-dark">
+        <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-5 text-[0.78rem] text-stone-dark">
           <p>© {new Date().getFullYear()} STYLEORA. All rights reserved.</p>
-          <p className="tracking-[0.05em]">Personal Style Atelier — Module 1 Production Build</p>
+          <DeveloperCredit />
         </div>
       </div>
     </footer>

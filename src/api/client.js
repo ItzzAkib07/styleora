@@ -1,4 +1,16 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
+const resolveApiBaseUrl = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl) {
+    const cleaned = envUrl.replace(/\/$/, '');
+    if (cleaned === '/api') {
+      return '/api/v1';
+    }
+    return cleaned;
+  }
+  return import.meta.env.DEV ? 'http://localhost:8000/api/v1' : '/api/v1';
+};
+
+const API_BASE_URL = resolveApiBaseUrl();
 
 export class ApiError extends Error {
   constructor(message, code = 'API_ERROR', status = 500, referenceId = undefined, details = undefined) {
@@ -19,8 +31,17 @@ export async function apiClient(endpoint, options = {}) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
-  const url = `${API_BASE_URL.replace(/\/$/, '')}${cleanEndpoint}`;
+  // Normalize endpoint: strip leading slashes and any redundant leading 'api/' or 'v1/'
+  let path = endpoint.replace(/^\/+/, '');
+  if (path.startsWith('api/')) {
+    path = path.slice(4);
+  }
+  if (path.startsWith('v1/')) {
+    path = path.slice(3);
+  }
+
+  const base = API_BASE_URL.replace(/\/+$/, '');
+  const url = `${base}/${path}`;
 
   const defaultHeaders = {
     'Content-Type': 'application/json',

@@ -10,46 +10,66 @@ export const AtelierSculptureSection = () => {
 
       <AtelierContainer>
         <SectionHeading
-          eyebrow="Interactive 3D Geometry"
-          title="The Sculpture of Personal Architecture."
-          subtitle="An interactive metaphor of style equilibrium. An infinite Mobius form expressing the unbroken harmony between facial geometry, anatomical drape, and chromatic resonance."
+          eyebrow="Atelier Form & Silhouette"
+          title="The Architecture of the Silhouette."
+          subtitle="An interactive study in couture draping and anatomical proportion. An artistic metaphor expressing how structured tailoring and bias-cut textiles sculpt an empowering personal style."
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center max-w-6xl mx-auto">
-          {/* 3D WebGL Canvas */}
-          <div className="lg:col-span-7 h-[420px] sm:h-[480px] border border-border-subtle bg-charcoal/60 relative overflow-hidden">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center max-w-7xl mx-auto">
+          {/* 3D WebGL Canvas — Hero-Level Viewport (70-85vh) */}
+          <div className="lg:col-span-7 xl:col-span-8 min-h-[500px] h-[64vh] sm:h-[72vh] lg:h-[78vh] xl:h-[82vh] max-h-[880px] border border-border-subtle bg-gradient-to-b from-charcoal/90 via-charcoal/60 to-obsidian relative overflow-hidden flex flex-col justify-center items-center shadow-elevated">
             <AtelierSculpture className="w-full h-full" />
-            <div className="absolute top-4 left-4 text-[0.65rem] tracking-editorial-ultra text-muted-gold uppercase">
+            
+            {/* Editorial Metadata Overlays */}
+            <div className="absolute top-4 left-4 sm:top-5 sm:left-5 text-[0.65rem] tracking-editorial-ultra text-muted-gold uppercase pointer-events-none">
               INTERACTIVE ATELIER CANVAS // 60 FPS
             </div>
-            <div className="absolute bottom-4 right-4 text-[0.65rem] tracking-editorial-ultra text-stone uppercase">
-              ROTATE WITH CURSOR
+            <div className="hidden sm:block absolute top-5 right-5 text-[0.65rem] tracking-editorial-ultra text-stone/80 uppercase pointer-events-none">
+              ATELIER SPEC 1:1 // 360° INSPECT
+            </div>
+            <div className="hidden sm:block absolute bottom-4 left-5 text-[0.65rem] tracking-editorial-ultra text-stone/60 uppercase pointer-events-none">
+              PROPORTION CALIBRATION // BESPOKE
+            </div>
+            <div className="absolute bottom-4 right-4 sm:bottom-5 sm:right-5 text-[0.65rem] tracking-editorial-ultra text-muted-gold uppercase pointer-events-none">
+              DRAG TO ROTATE 360°
             </div>
           </div>
 
-          {/* Right Narrative Notes */}
-          <div className="lg:col-span-5 flex flex-col gap-6">
-            <div className="p-6 border border-border-subtle bg-charcoal">
+          {/* Right Narrative Specifications */}
+          <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-5">
+            <div className="p-6 border border-border-subtle bg-charcoal/80 transition-colors duration-300 hover:border-border-medium">
               <span className="font-cinzel text-xs text-muted-gold tracking-widest block mb-1">
-                EQUILIBRIUM SPEC. I
+                SILHOUETTE SPEC. I
               </span>
               <h4 className="font-editorial text-2xl text-warm-ivory mb-2 font-normal">
-                Continuous Anatomical Flow
+                Couture Draping & Proportions
               </h4>
               <p className="text-ivory-muted text-sm font-light leading-relaxed">
-                Garments should never visually sever the body. Like the Mobius contour, proper tailoring creates an unbroken vertical trajectory that elongates and empowers.
+                Garments should elevate rather than conceal the body. Through precise bias-cut draping, fabric cascades along natural anatomical contours, elongating the posture and creating an effortless sense of poise.
               </p>
             </div>
 
-            <div className="p-6 border border-border-subtle bg-charcoal">
+            <div className="p-6 border border-border-subtle bg-charcoal/80 transition-colors duration-300 hover:border-border-medium">
               <span className="font-cinzel text-xs text-muted-gold tracking-widest block mb-1">
-                EQUILIBRIUM SPEC. II
+                SILHOUETTE SPEC. II
               </span>
               <h4 className="font-editorial text-2xl text-warm-ivory mb-2 font-normal">
-                Reflectance & Texture Dynamics
+                Tactile Materiality & Contrast
               </h4>
               <p className="text-ivory-muted text-sm font-light leading-relaxed">
-                Brushed champagne metals and obsidian matte surfaces mirror the contrast ratio between matte wools, raw silks, and polished leather accessories.
+                A curated wardrobe thrives on sensory balance. The tactile dialogue between matte tailored crepe, liquid champagne silks, and brushed metal accents mirrors the sophisticated layering of a bespoke capsule collection.
+              </p>
+            </div>
+
+            <div className="p-6 border border-border-subtle bg-charcoal/80 transition-colors duration-300 hover:border-border-medium">
+              <span className="font-cinzel text-xs text-muted-gold tracking-widest block mb-1">
+                SILHOUETTE SPEC. III
+              </span>
+              <h4 className="font-editorial text-2xl text-warm-ivory mb-2 font-normal">
+                Anatomical Architecture
+              </h4>
+              <p className="text-ivory-muted text-sm font-light leading-relaxed">
+                Personal style is architectural. By calibrating the golden ratio between shoulder breadth, waistline cinch, and hem trajectory, every ensemble is engineered to empower your authentic presence.
               </p>
             </div>
           </div>

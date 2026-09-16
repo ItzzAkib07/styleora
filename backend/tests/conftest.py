@@ -8,9 +8,17 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_asyn
 # Set test environment
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
+os.environ["RAZORPAY_KEY_ID"] = "rzp_test_mock_key_123"
+os.environ["RAZORPAY_KEY_SECRET"] = "rzp_test_mock_secret_456"
+os.environ["RAZORPAY_WEBHOOK_SECRET"] = "rzp_test_mock_webhook_sec_789"
+os.environ["RAZORPAY_MODE"] = "test"
 
-from app.config.settings import get_settings
+from app.core.limiter import limiter
 from app.db.base import Base
+from app.services.razorpay_client import razorpay_client
+razorpay_client.key_id = "rzp_test_mock_key_123"
+razorpay_client.key_secret = "rzp_test_mock_secret_456"
+razorpay_client.webhook_secret = "rzp_test_mock_webhook_sec_789"
 from app.db.session import get_db
 from app.main import create_application
 
@@ -42,6 +50,7 @@ async def db_session():
 
 @pytest_asyncio.fixture(scope="function")
 async def client(db_session: AsyncSession):
+    limiter.reset()
     app = create_application()
 
     async def override_get_db():
@@ -54,3 +63,5 @@ async def client(db_session: AsyncSession):
         yield ac
 
     app.dependency_overrides.clear()
+    limiter.reset()
+

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { ArrowUpRight, Calendar, Video, FileText } from 'lucide-react';
+import { ArrowUpRight, UserCheck, Eye, Shapes, Palette, Sparkles, BookOpen } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Button } from '@/components/ui';
 import { gsap } from '@/lib/gsap';
@@ -10,27 +10,48 @@ export const HowItWorksSection = () => {
   const stepsRef = useRef([]);
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  const steps = [
+  const methodPhases = [
     {
       num: '01',
-      icon: Calendar,
-      title: 'Private Reservation & Intake',
-      duration: 'Step 1 • Immediate',
-      desc: 'Submit your styling reservation and complete our private digital questionnaire capturing lifestyle demands, current frustrations, and aesthetic inclinations.',
+      icon: UserCheck,
+      title: 'Profile',
+      phase: 'The Person Behind The Wardrobe',
+      desc: 'We understand who you are, how you live, your professional demands, aesthetic goals, and practical daily needs.',
     },
     {
       num: '02',
-      icon: Video,
-      title: 'One-on-One Atelier Session',
-      duration: 'Step 2 • 90 Minutes',
-      desc: 'Connect in an unhurried, private high-definition consultation with your master stylist for comprehensive facial analysis, silhouette calibration, and chromatic testing.',
+      icon: Eye,
+      title: 'Visage',
+      phase: 'The Visual Frame',
+      desc: 'Optical facial geometry analysis, flattering eyewear framing, neckline architecture, hair direction, and framing accessories.',
     },
     {
       num: '03',
-      icon: FileText,
-      title: 'The Bespoke Styleora Blueprint',
-      duration: 'Step 3 • Delivered in 5 Days',
-      desc: 'Receive your comprehensive digital dossier—a 30+ page bespoke guide detailing your 30-piece capsule, tailoring specifications, and color harmony cards.',
+      icon: Shapes,
+      title: 'Form',
+      phase: 'Proportions & Silhouette',
+      desc: 'Body proportions calibration, flattering cut strategy, waist definition, column dressing, tailoring direction, and fabric draping.',
+    },
+    {
+      num: '04',
+      icon: Palette,
+      title: 'Palette',
+      phase: 'Chromatic Harmony',
+      desc: 'Skin tone and undertone discovery, separating your colours into foundational neutrals, signature hues, accents, and evening shades.',
+    },
+    {
+      num: '05',
+      icon: Sparkles,
+      title: 'Signature',
+      phase: 'Personal Style & Looks',
+      desc: 'Translating theory into curated outfit directions spanning professional, smart casual, casual, ethnic, Indo-Western, and evening attire.',
+    },
+    {
+      num: '06',
+      icon: BookOpen,
+      title: 'Blueprint',
+      phase: 'The Tangible Core Deliverable',
+      desc: 'Bringing everything together into your considered, actionable Personal Style Blueprint—a high-resolution dossier you can actually use.',
     },
   ];
 
@@ -47,7 +68,7 @@ export const HowItWorksSection = () => {
             opacity: 1,
             y: 0,
             duration: 0.85,
-            stagger: 0.16,
+            stagger: 0.12,
             ease: 'power2.out',
             scrollTrigger: {
               trigger: sectionRef.current,
@@ -66,45 +87,45 @@ export const HowItWorksSection = () => {
     <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-charcoal/40 relative">
       <AtelierContainer>
         <SectionHeading
-          eyebrow="The Atelier Method"
-          title="From Consultation to Defined Permanence."
-          subtitle="A structured, high-touch styling journey designed with rigor, discretion, and profound respect for your time."
+          eyebrow="The STYLEORA Atelier Method"
+          title="A Method of Distinctive Precision."
+          subtitle="Personal style is more than what looks good. It is the relationship between who you are, how you live and how you want to be seen. Our Atelier Method brings those elements together into a style direction that feels distinctly yours."
         />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative mb-14">
-          {steps.map((step, idx) => {
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 relative mb-14">
+          {methodPhases.map((step, idx) => {
             const Icon = step.icon;
             return (
               <div
                 key={step.num}
                 ref={(el) => (stepsRef.current[idx] = el)}
-                className="relative bg-charcoal border border-border-subtle p-8 flex flex-col justify-between transition-all duration-300 hover:border-border-medium hover:-translate-y-1"
+                className="relative bg-charcoal border border-border-subtle p-7 flex flex-col justify-between transition-all duration-300 hover:border-champagne/60 hover:-translate-y-1"
               >
                 <div>
-                  <div className="flex items-center justify-between mb-6">
-                    <div className="w-10 h-10 border border-border-medium flex items-center justify-center text-muted-gold">
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-10 h-10 border border-border-medium flex items-center justify-center text-muted-gold bg-obsidian">
                       <Icon size={18} />
                     </div>
-                    <span className="font-editorial text-3xl text-muted-gold/60 leading-none">
+                    <span className="font-editorial text-3xl text-muted-gold/50 leading-none">
                       {step.num}
                     </span>
                   </div>
 
-                  <span className="text-[0.68rem] tracking-editorial-ultra text-champagne uppercase font-medium block mb-2">
-                    {step.duration}
+                  <span className="text-[0.68rem] tracking-editorial-ultra text-champagne uppercase font-medium block mb-1">
+                    {step.phase}
                   </span>
 
-                  <h3 className="font-editorial text-2xl text-warm-ivory mb-3 font-normal">
+                  <h3 className="font-editorial text-2xl text-warm-ivory mb-2.5 font-normal">
                     {step.title}
                   </h3>
 
-                  <p className="text-ivory-muted text-sm leading-relaxed font-light">
+                  <p className="text-ivory-muted text-xs leading-relaxed font-light">
                     {step.desc}
                   </p>
                 </div>
 
-                <div className="mt-8 pt-4 border-t border-border-subtle/50 text-[0.7rem] text-stone uppercase tracking-wider">
-                  Phase 0{idx + 1}
+                <div className="mt-6 pt-3 border-t border-border-subtle/50 text-[0.65rem] text-stone uppercase tracking-widest">
+                  Method 0{idx + 1}
                 </div>
               </div>
             );

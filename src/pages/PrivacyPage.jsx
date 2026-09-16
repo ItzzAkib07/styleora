@@ -65,7 +65,7 @@ export const PrivacyPage = () => {
                 5. Data Retention & Archival
               </h3>
               <p>
-                Your styling dossiers remain archived in your private encrypted atelier vault for lifetime reference. You may at any time request permanent purging of photographic intake assets by notifying our privacy officer at <span className="text-champagne">atelier@styleora.luxury</span>.
+                Your styling dossiers remain archived in your private encrypted atelier vault for lifetime reference. You may at any time request permanent purging of photographic intake assets by notifying our privacy officer at <a href="mailto:hello@styleora.me" className="text-champagne hover:underline">hello@styleora.me</a>.
               </p>
             </section>
           </div>

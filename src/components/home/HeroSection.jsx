@@ -6,7 +6,7 @@ import { CinematicHeroMedia } from '@/components/media/CinematicHeroMedia';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
-export const HeroSection = ({ health, loading }) => {
+export const HeroSection = ({ health, loading, videoSrc = null }) => {
   const sectionRef = useRef(null);
   const eyebrowRef = useRef(null);
   const headlineRef = useRef(null);
@@ -94,7 +94,7 @@ export const HeroSection = ({ health, loading }) => {
     <section ref={sectionRef} className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
       {/* Background Cinematic Atmosphere Layer */}
       <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
-        <CinematicHeroMedia />
+        <CinematicHeroMedia className="w-full h-full" videoSrc={videoSrc} />
       </div>
 
       {/* Subtle Ambient Radial Lighting */}

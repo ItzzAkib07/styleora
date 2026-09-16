@@ -1,56 +1,85 @@
 import React from 'react';
-import { ArrowUpRight, Camera, Video, FileCheck, MessageSquare } from 'lucide-react';
+import { ArrowUpRight, UserCheck, Eye, Shapes, Palette, Sparkles, BookOpen, Clock, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Card, Button, SEO } from '@/components/ui';
 
 export const HowItWorksPage = () => {
-  const steps = [
+  const methodPhases = [
     {
       num: '01',
-      icon: Camera,
-      title: 'Digital Intake & Visual Calibration',
-      timing: 'Upon Reservation • 15 Minutes',
-      desc: 'Following confirmation, you complete our confidential intake dossier. You photograph 5–10 representative garments currently in your rotation and specify primary lifestyle requirements.',
+      icon: UserCheck,
+      title: 'Profile — The Person Behind The Wardrobe',
+      timing: 'Intake & Stylist Discussion',
+      desc: 'Understanding your individual lifestyle, career demands, aesthetic goals, comfort boundaries, and personal style aspirations. We anchor styling decisions in who you are and how you actually live.',
       inclusions: [
-        'Confidential lifestyle questionnaire',
-        'Natural-light photographic guideline',
-        'Color preference & sensitivity check',
+        'Confidential lifestyle & wardrobe questionnaire',
+        '30-minute private 1:1 stylist consultation session',
+        'Occasion-aware and practical lifestyle priorities',
       ],
     },
     {
       num: '02',
-      icon: Video,
-      title: 'The Private Atelier Consultation',
-      timing: 'Scheduled At Your Convenience • 90 Minutes',
-      desc: 'Connect with your assigned senior stylist in an unhurried virtual session. Using specialized screen-sharing tools, we perform optical face-geometry mapping, silhouette drape grading, and live chromatic testing.',
+      icon: Eye,
+      title: 'Visage — The Visual Frame',
+      timing: 'Facial Analysis & Optical Balance',
+      desc: 'Analyzing your face shape, features, and bone structure to identify flattering necklines, eyewear frames, earring shapes, and haircut/hairstyling direction for everyday and special occasions.',
       inclusions: [
-        'Live facial geometry & proportions breakdown',
-        'Seasonal undertone & contrast validation',
-        'Direct audit of key wardrobe questions',
+        'Face-shape breakdown and optical balancing rules',
+        'Flattering eyewear geometry and sunglass framing',
+        'Neckline and sleeve style recommendations',
+        'Haircut, styling direction & accessory pairing',
       ],
     },
     {
       num: '03',
-      icon: FileCheck,
-      title: 'Dossier Synthesis & Delivery',
-      timing: 'Delivered in 5 Business Days',
-      desc: 'Our master stylists synthesize the consultation data to craft your comprehensive Styleora Blueprint—a high-resolution 30+ page personal style guide with exact brand links and tailoring metrics.',
+      icon: Shapes,
+      title: 'Form — Proportions & Silhouette Strategy',
+      timing: 'Body Shape & Proportional Balance',
+      desc: 'Evaluating body proportions, horizontal and vertical lines, and movement to establish deliberate silhouette strategies. We focus on column dressing, proportion balancing, waist definition, fabrics, and tailoring guidance.',
       inclusions: [
-        '30-Piece modular capsule plan (120+ combinations)',
-        '8-Color signature swatch cards with fabric weights',
-        'Exact garment tailoring alteration guide',
+        'Body shape identification and proportional balancing',
+        'Waist definition and column dressing techniques',
+        'Fabric drape, textures, prints, and scale guidance',
+        'Fit, tailoring modifications, and hemline guidelines',
       ],
     },
     {
       num: '04',
-      icon: MessageSquare,
-      title: 'Dedicated Concierge Styling Window',
-      timing: '30 Days Post-Delivery',
-      desc: 'Ensure flawless execution. For 30 days following dossier delivery, enjoy direct messaging access with your stylist to review new acquisitions, verify fits, and calibrate upcoming event looks.',
+      icon: Palette,
+      title: 'Palette — Chromatic Harmony',
+      timing: 'Skin Tone & Undertone Discovery',
+      desc: 'Discovering the specific shades and undertones that make your natural coloring look radiant and energized. Your palette is thoughtfully organized into foundational neutrals, signature colors, accents, and evening shades.',
       inclusions: [
-        'Direct stylist messaging channel',
-        'Fitting feedback on newly acquired pieces',
-        'High-stakes event outfit confirmation',
+        'Skin tone and warm/cool/neutral undertone analysis',
+        'Foundational neutral palette for wardrobe building blocks',
+        'Signature colours, seasonal accents & evening shades',
+        'Colour coordination rules and contrast level advice',
+      ],
+    },
+    {
+      num: '05',
+      icon: Sparkles,
+      title: 'Signature — Personalised Outfit Direction',
+      timing: 'Contextual Look Curation',
+      desc: 'Translating theory into tangible, beautiful outfit curation across every context of your life—including professional dressing, smart-casual, elevated casual, ethnic, Indo-Western, and festive occasion wear.',
+      inclusions: [
+        'Executive & professional silhouette combinations',
+        'Smart-casual and relaxed weekend ensembles',
+        'Ethnic, festive, and Indo-Western look direction',
+        'Footwear, handbag, jewelry, and accessory pairing',
+      ],
+    },
+    {
+      num: '06',
+      icon: BookOpen,
+      title: 'Blueprint — The Tangible Core Deliverable',
+      timing: 'Delivered Post-Consultation',
+      desc: 'All findings, analyses, and personalized directions are distilled into your STYLEORA Signature Blueprint—an authoritative, comprehensive style dossier designed around you that you can actually use for years to come.',
+      inclusions: [
+        'Complete Personalised Style Blueprint digital dossier',
+        'Summary of all visage, form, palette, and signature looks',
+        'Wardrobe essentials, layering, and third-piece strategy',
+        'Personalised makeup, grooming, and fragrance finishing notes',
       ],
     },
   ];
@@ -58,22 +87,22 @@ export const HowItWorksPage = () => {
   return (
     <>
       <SEO
-        title="The Atelier Method — Structured Styling Intelligence"
-        description="Discover the four-phase methodology guiding every STYLEORA personal styling consultation. Analytical precision, bespoke dossiers, and 30 days of direct concierge access."
+        title="The STYLEORA Atelier Method — Structured Styling Intelligence"
+        description="Discover the 6-phase Atelier Method guiding the STYLEORA Signature Blueprint: Profile, Visage, Form, Palette, Signature, and Blueprint."
       />
 
       <div className="pt-32 pb-24 md:pt-40 md:pb-32">
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"
-            eyebrow="The Atelier Method"
+            eyebrow="The STYLEORA Atelier Method"
             title="A Method of Uncompromising Distinction."
-            subtitle="From initial intake to lifetime wardrobe architecture, our consultation methodology is engineered for clarity, discretion, and lasting poise."
+            subtitle="Personal style is more than what looks good. It is the relationship between who you are, how you live and how you want to be seen. Our Atelier Method brings those elements together into a style direction that feels distinctly yours."
           />
 
           {/* Chronological Steps */}
           <div className="flex flex-col gap-8 mb-16">
-            {steps.map((step) => {
+            {methodPhases.map((step) => {
               const Icon = step.icon;
               return (
                 <Card key={step.num} className="p-8 sm:p-10">
@@ -119,11 +148,11 @@ export const HowItWorksPage = () => {
                 Ready to Commission Your Blueprint?
               </h4>
               <p className="text-stone text-sm font-light">
-                Consultation slots are reserved strictly on a first-come queue.
+                STYLEORA Signature Blueprint — Complete personal styling experience for ₹2,799.
               </p>
             </div>
             <Button to={ROUTES.CONSULTATION} variant="primary" size="lg" icon={ArrowUpRight}>
-              Reserve Consultation
+              Commission Your Blueprint
             </Button>
           </div>
         </AtelierContainer>
