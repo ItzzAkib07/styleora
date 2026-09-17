@@ -29,6 +29,7 @@ import { paymentService } from '@/services/paymentService';
 import { loadRazorpayScript } from '@/utils/razorpay';
 import { formatDateTime } from '@/utils/dateTime';
 import { AtelierContainer, SectionHeading, Card, Button, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const PHONE_REGEX = /^\+?[0-9\s\-()]{8,25}$/;
@@ -432,7 +433,10 @@ export const ConsultationPage = () => {
         description="Commission your STYLEORA Signature Blueprint. A complete personal styling experience combining a 30-minute private stylist consultation with a bespoke style blueprint for ₹2,799."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32 min-h-screen bg-obsidian">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 min-h-screen bg-obsidian relative overflow-hidden">
+        {/* Calm Atmospheric Lighting for Focused Booking & Consultation */}
+        <AtmosphericBackground variant="calm" intensity="minimal" />
+
         <AtelierContainer>
           {/* ========================================================================= */}
           {/* SUCCESS STATE: CONSULTATION RESERVED CONFIRMATION SCREEN                  */}
@@ -792,12 +796,12 @@ export const ConsultationPage = () => {
 
                   <div>
                     <p className="text-[0.68rem] tracking-editorial-ultra text-muted-gold uppercase font-medium mb-3">
-                      Included In Your Blueprint:
+                      Inside your blueprint:
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {corePackage.features.map((feat) => (
                         <div key={feat} className="flex items-start gap-2 text-xs text-ivory-muted font-light">
-                          <Check size={14} className="text-muted-gold shrink-0 mt-0.5" />
+                          <span className="text-champagne text-[0.65rem] mt-0.5 shrink-0 select-none">✦</span>
                           <span>{feat}</span>
                         </div>
                       ))}

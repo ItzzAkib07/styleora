@@ -3,10 +3,14 @@ import { Check, ArrowUpRight, Sparkles, Plus } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { CORE_PACKAGE, ADD_ONS } from '@/constants/packages';
 import { AtelierContainer, SectionHeading, Button } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const PackagesSection = () => {
   return (
-    <section className="py-20 md:py-28 border-t border-border-subtle bg-charcoal/40 relative">
+    <section className="py-20 md:py-28 border-t border-border-subtle bg-charcoal/40 relative overflow-hidden">
+      {/* Atelier Experience Atmosphere */}
+      <AtmosphericBackground variant="blueprint" intensity="subtle" />
+
       <AtelierContainer>
         <SectionHeading
           eyebrow="The STYLEORA Experience"
@@ -58,12 +62,12 @@ export const PackagesSection = () => {
             <div className="mb-10">
               <p className="text-xs tracking-editorial-ultra text-muted-gold uppercase font-medium mb-5 flex items-center gap-2">
                 <Sparkles size={13} className="text-champagne" />
-                What is Included in Your Signature Blueprint
+                Inside your blueprint:
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {CORE_PACKAGE.features.map((feat) => (
                   <div key={feat} className="flex items-start gap-3 text-sm text-ivory-muted font-light leading-relaxed">
-                    <Check size={16} className="text-muted-gold shrink-0 mt-0.5" />
+                    <span className="text-champagne text-xs mt-0.5 shrink-0 select-none">✦</span>
                     <span>{feat}</span>
                   </div>
                 ))}

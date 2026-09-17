@@ -1,6 +1,7 @@
 import React from 'react';
 import { Lock, UserCheck, Scale, Sparkles } from 'lucide-react';
 import { AtelierContainer, SectionHeading, Card } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const StylistAtelierSection = () => {
   const commitments = [
@@ -22,7 +23,10 @@ export const StylistAtelierSection = () => {
   ];
 
   return (
-    <section className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative">
+    <section className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative overflow-hidden">
+      {/* Atelier Craftsmanship Editorial Atmosphere */}
+      <AtmosphericBackground variant="editorial" intensity="subtle" />
+
       <AtelierContainer>
         <div className="max-w-4xl mx-auto text-center mb-16">
           <SectionHeading

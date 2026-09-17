@@ -3,6 +3,7 @@ import { ArrowUpRight, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, Eyebrow, Button } from '@/components/ui';
 import { CinematicHeroMedia } from '@/components/media/CinematicHeroMedia';
+import { AtmosphericBackground } from '@/components/background';
 import { gsap, ScrollTrigger } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
@@ -92,15 +93,21 @@ export const HeroSection = ({ health, loading, videoSrc = null }) => {
 
   return (
     <section ref={sectionRef} className="relative pt-32 pb-20 md:pt-40 md:pb-28 overflow-hidden">
-      {/* Background Cinematic Atmosphere Layer */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none overflow-hidden">
+      {/* Background Cinematic Atmosphere Layer (Subtly elevated opacity from 0.20 to 0.30) */}
+      <div className="absolute inset-0 opacity-[0.28] sm:opacity-[0.32] pointer-events-none overflow-hidden transition-opacity duration-1000">
         <CinematicHeroMedia className="w-full h-full" videoSrc={videoSrc} />
+        {/* Contrast Protection Gradients */}
+        <div className="absolute inset-0 bg-gradient-to-b from-obsidian/70 via-transparent to-obsidian/90 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_35%,_#0B0B0C_95%)] pointer-events-none" />
       </div>
 
-      {/* Subtle Ambient Radial Lighting */}
+      {/* Atmospheric Background Motion */}
+      <AtmosphericBackground variant="hero" intensity="subtle" />
+
+      {/* Subtle Scroll-Driven Ambient Radial Glow */}
       <div
         ref={glowRef}
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-muted-gold/5 rounded-full blur-[140px] pointer-events-none"
+        className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-muted-gold/8 rounded-full blur-[140px] pointer-events-none animate-ambient-breathe"
       />
 
       <AtelierContainer>

@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight, Compass, Shield, Award } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Card, Button, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const AboutPage = () => {
   const principles = [
@@ -32,7 +33,10 @@ export const AboutPage = () => {
         description="Learn about the philosophy and principles guiding STYLEORA. An exclusive digital atelier dedicated to bespoke wardrobe architecture and timeless presence."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 relative overflow-hidden">
+        {/* Atelier Editorial Manifesto Atmosphere */}
+        <AtmosphericBackground variant="editorial" intensity="subtle" />
+
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"

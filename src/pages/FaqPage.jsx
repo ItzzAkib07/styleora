@@ -2,6 +2,7 @@ import React from 'react';
 import { Mail } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Accordion, Button, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const FaqPage = () => {
   const schedulingFaqs = [
@@ -37,7 +38,7 @@ export const FaqPage = () => {
   const deliverableFaqs = [
     {
       q: 'What format is the Styleora Blueprint delivered in?',
-      a: 'Your blueprint is delivered as an ultra-high-definition interactive digital dossier containing your bespoke colour palette, facial framing recommendations, silhouette strategies, curated signature looks, and practical wardrobe advice.',
+      a: 'Your blueprint is delivered as an ultra-high-definition interactive digital style guide containing your personal style assessment, body & proportion analysis, personal colour direction, signature silhouettes & fits, personalised shopping guidance, 20 curated outfit ideas, accessories & footwear guidance, and hair & makeup direction.',
     },
     {
       q: 'Do you sell clothes directly or recommend specific stores?',
@@ -67,7 +68,10 @@ export const FaqPage = () => {
         description="Comprehensive answers to all questions regarding the STYLEORA personal styling atelier, scheduling protocol, session preparation, and deliverable dossiers."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 relative overflow-hidden">
+        {/* Editorial Clarifications Atmosphere */}
+        <AtmosphericBackground variant="editorial" intensity="minimal" />
+
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"

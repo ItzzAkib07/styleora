@@ -2,6 +2,7 @@ import React from 'react';
 import { Mail, Clock, Shield, ArrowUpRight } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Card, Button, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const ContactPage = () => {
   return (
@@ -11,7 +12,10 @@ export const ContactPage = () => {
         description="Connect with the STYLEORA private styling concierge for consultation inquiries, corporate bookings, and client service."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 relative overflow-hidden">
+        {/* Concierge Invitation Atmosphere */}
+        <AtmosphericBackground variant="invitation" intensity="subtle" />
+
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"

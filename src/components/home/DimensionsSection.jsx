@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { Eye, Layers, Palette, Award, Briefcase, Compass } from 'lucide-react';
 import { AtelierContainer, SectionHeading, Card } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 import { gsap } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
@@ -36,9 +37,9 @@ export const DimensionsSection = () => {
     },
     {
       code: 'WARDROBE',
-      title: 'The 30-Piece Modular Capsule',
+      title: 'The Modular Capsule',
       icon: Briefcase,
-      desc: 'Eliminating excess. A disciplined, high-interchangeability wardrobe where every garment harmonizes with at least four companion pieces.',
+      desc: 'Eliminating excess. A disciplined, high-interchangeability wardrobe where every garment harmonizes with versatile companion pieces.',
     },
     {
       code: 'OCCASIONS',
@@ -77,7 +78,10 @@ export const DimensionsSection = () => {
   }, [prefersReducedMotion]);
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative">
+    <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative overflow-hidden">
+      {/* Six Dimensions Architectural Blueprint Atmosphere */}
+      <AtmosphericBackground variant="blueprint" intensity="subtle" />
+
       <AtelierContainer>
         <SectionHeading
           eyebrow="The Six Dimensions"

@@ -38,6 +38,11 @@ export const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to={ROUTES.SIGNATURE_BLUEPRINT} className="text-sm text-ivory-muted hover:text-champagne transition-colors">
+                  Signature Blueprint
+                </Link>
+              </li>
+              <li>
                 <Link to={ROUTES.CONSULTATION} className="text-sm text-ivory-muted hover:text-champagne transition-colors">
                   Private Consultation
                 </Link>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { AtelierContainer, SectionHeading, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const PrivacyPage = () => {
   return (
@@ -9,7 +10,10 @@ export const PrivacyPage = () => {
         description="STYLEORA client privacy and confidentiality policy. Learn how our personal style atelier protects your photographic records, measurements, and personal data."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 relative overflow-hidden">
+        {/* Calm Reading Atmosphere */}
+        <AtmosphericBackground variant="calm" intensity="minimal" />
+
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"

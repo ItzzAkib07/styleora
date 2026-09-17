@@ -4,6 +4,7 @@ import { RootLayout } from '@/layouts/RootLayout';
 import { HomePage } from '@/pages/HomePage';
 import { AboutPage } from '@/pages/AboutPage';
 import { HowItWorksPage } from '@/pages/HowItWorksPage';
+import { SignatureBlueprintPage } from '@/pages/SignatureBlueprintPage';
 import { ConsultationPage } from '@/pages/ConsultationPage';
 import { FaqPage } from '@/pages/FaqPage';
 import { ContactPage } from '@/pages/ContactPage';
@@ -21,6 +22,7 @@ export const App = () => {
           <Route index element={<HomePage />} />
           <Route path={ROUTES.ABOUT} element={<AboutPage />} />
           <Route path={ROUTES.HOW_IT_WORKS} element={<HowItWorksPage />} />
+          <Route path={ROUTES.SIGNATURE_BLUEPRINT} element={<SignatureBlueprintPage />} />
           <Route path={ROUTES.CONSULTATION} element={<ConsultationPage />} />
           <Route path={ROUTES.FAQ} element={<FaqPage />} />
           <Route path={ROUTES.CONTACT} element={<ContactPage />} />

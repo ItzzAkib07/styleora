@@ -1,5 +1,6 @@
 import React from 'react';
 import { AtelierContainer, SectionHeading, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const RefundPolicyPage = () => {
   return (
@@ -9,7 +10,10 @@ export const RefundPolicyPage = () => {
         description="STYLEORA consultation cancellation and refund terms. Learn about our 100% refund guarantee prior to scheduling confirmation."
       />
 
-      <div className="pt-32 pb-24 md:pt-40 md:pb-32">
+      <div className="pt-32 pb-24 md:pt-40 md:pb-32 relative overflow-hidden">
+        {/* Calm Reading Atmosphere */}
+        <AtmosphericBackground variant="calm" intensity="minimal" />
+
         <AtelierContainer size="narrow">
           <SectionHeading
             align="left"

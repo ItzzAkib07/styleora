@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Sparkles, ArrowRight } from 'lucide-react';
 import { LOOKS } from '@/constants/looks';
 import { AtelierContainer, Eyebrow, Button } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 import { ROUTES } from '@/constants/routes';
 import { gsap } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
@@ -314,16 +315,14 @@ export const StyleoraLookEdit = () => {
       className="py-10 sm:py-12 md:py-14 border-t border-border-subtle bg-obsidian relative overflow-hidden select-none"
       aria-labelledby="look-edit-heading"
     >
-      {/* Background Ambient Atmosphere */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-champagne/4 rounded-full blur-[140px] pointer-events-none"
-      />
+      {/* Fashion Editorial Atmosphere */}
+      <AtmosphericBackground variant="outfit" intensity="subtle" />
 
       <AtelierContainer>
         {/* Compact Section Header */}
         <div className="max-w-3xl mx-auto text-center mb-5 sm:mb-6">
           <div className="mb-2 flex justify-center">
-            <Eyebrow>Editorial Look Archive // 2026</Eyebrow>
+            <Eyebrow>Editorial Look Archive</Eyebrow>
           </div>
 
           <h2

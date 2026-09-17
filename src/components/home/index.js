@@ -1,5 +1,7 @@
 export { HeroSection } from './HeroSection';
 export { BrandPositioningSection } from './BrandPositioningSection';
+export { StatsSection } from './StatsSection';
+export { ClientStoriesSection } from './ClientStoriesSection';
 export { HowItWorksSection } from './HowItWorksSection';
 export { DimensionsSection } from './DimensionsSection';
 export { BlueprintDeliverableSection } from './BlueprintDeliverableSection';

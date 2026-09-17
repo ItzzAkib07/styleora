@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, Button, SEO } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const NotFoundPage = () => {
   return (
@@ -11,7 +12,10 @@ export const NotFoundPage = () => {
         description="The requested page does not exist or has been archived in the STYLEORA atelier."
       />
 
-      <div className="pt-40 pb-32 min-h-[85vh] flex items-center justify-center text-center">
+      <div className="pt-40 pb-32 min-h-[85vh] flex items-center justify-center text-center relative overflow-hidden">
+        {/* Subtle Atmospheric Glow */}
+        <AtmosphericBackground variant="calm" intensity="subtle" />
+
         <AtelierContainer size="narrow">
           <span className="font-editorial text-7xl sm:text-8xl md:text-9xl text-muted-gold/70 leading-none block mb-4 font-normal select-none">
             404

@@ -126,7 +126,7 @@ export const LOOKS = [
     subtitle: 'Breathable Ease for Global Horizons',
     description:
       'Modular travel curation engineered for effortless packing across climate transitions. Breathable mulberry silks, airy poplin weaves, and interchangeable earth-tone coordinates.',
-    dimension: 'Dimension V // 30-Piece Modular Capsule',
+    dimension: 'Dimension V // Modular Capsule',
     silhouette: 'Relaxed Kimono & Wide Trouser',
     swatches: ['#8E8D8A', '#E6D7C3', '#6B8E70'],
     paletteName: 'Olive Mineral & Sun-Bleached Sand',

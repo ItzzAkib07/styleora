@@ -2,6 +2,7 @@ import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, SectionHeading, Accordion, Button } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const HomeFaqSection = () => {
   const faqs = [
@@ -28,7 +29,10 @@ export const HomeFaqSection = () => {
   ];
 
   return (
-    <section className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative">
+    <section className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative overflow-hidden">
+      {/* Editorial Clarifications Atmosphere */}
+      <AtmosphericBackground variant="editorial" intensity="minimal" />
+
       <AtelierContainer size="narrow">
         <SectionHeading
           eyebrow="Inquiries & Clarity"

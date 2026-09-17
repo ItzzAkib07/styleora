@@ -57,7 +57,7 @@ export const Header = () => {
 
           {/* Desktop Navigation */}
           <nav
-            className="hidden min-[900px]:flex items-center gap-10"
+            className="hidden min-[1024px]:flex items-center gap-5 xl:gap-7"
             aria-label="Main Navigation"
           >
             {NAV_LINKS.map((link) => {
@@ -66,7 +66,7 @@ export const Header = () => {
                 <Link
                   key={link.path}
                   to={link.path}
-                  className={`text-[0.825rem] tracking-[0.12em] uppercase transition-colors duration-300 py-1 ${
+                  className={`text-[0.8rem] tracking-[0.11em] uppercase transition-colors duration-300 py-1 ${
                     isActive ? 'text-champagne' : 'text-ivory-muted hover:text-champagne'
                   }`}
                 >
@@ -77,10 +77,10 @@ export const Header = () => {
           </nav>
 
           {/* Desktop CTA Action */}
-          <div className="hidden min-[900px]:flex items-center gap-6">
+          <div className="hidden min-[1024px]:flex items-center gap-4 xl:gap-6">
             <Link
               to={ROUTES.CONSULTATION}
-              className="inline-flex items-center gap-2 px-5 py-2.5 bg-champagne text-obsidian text-[0.78rem] tracking-[0.14em] font-semibold uppercase transition-all duration-300 hover:bg-warm-ivory hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-4 xl:px-5 py-2.5 bg-champagne text-obsidian text-[0.78rem] tracking-[0.14em] font-semibold uppercase transition-all duration-300 hover:bg-warm-ivory hover:-translate-y-0.5 whitespace-nowrap"
             >
               <span>Book Consultation</span>
               <ArrowUpRight size={14} />
@@ -94,7 +94,7 @@ export const Header = () => {
             aria-expanded={mobileOpen}
             aria-controls="mobile-navigation"
             aria-label={mobileOpen ? 'Close Navigation Menu' : 'Open Navigation Menu'}
-            className="min-[900px]:hidden flex items-center justify-center p-2 bg-transparent border border-border-medium text-warm-ivory cursor-pointer focus-visible:outline-2 focus-visible:outline-champagne"
+            className="min-[1024px]:hidden flex items-center justify-center p-2 bg-transparent border border-border-medium text-warm-ivory cursor-pointer focus-visible:outline-2 focus-visible:outline-champagne"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>

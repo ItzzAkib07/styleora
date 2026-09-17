@@ -1,6 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Check, Download, Shield } from 'lucide-react';
+import { Download, Shield, Sparkles } from 'lucide-react';
 import { AtelierContainer, SectionHeading, Card } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
+import { BLUEPRINT_INCLUSIONS } from '@/constants/packages';
 import { gsap } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
@@ -9,15 +11,6 @@ export const BlueprintDeliverableSection = () => {
   const showcaseRef = useRef(null);
   const textRef = useRef(null);
   const prefersReducedMotion = usePrefersReducedMotion();
-
-  const inclusions = [
-    'Complete Facial & Body Proportion Architecture Blueprint',
-    '8-Color Signature Chromatic Swatch Matrix with Fabric Notes',
-    '30-Piece Curated Capsule Wardrobe Plan with 120+ Outfits',
-    'Exact Tailoring & Alterations Measurement Spec Sheet',
-    'Direct Retail Brand Sourcing Guide across Luxury Houses',
-    '30 Days Direct Stylist Concierge Access via Dedicated Channel',
-  ];
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -79,6 +72,9 @@ export const BlueprintDeliverableSection = () => {
 
   return (
     <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-charcoal/30 relative overflow-hidden">
+      {/* Blueprint Deliverable Showcase Atmosphere */}
+      <AtmosphericBackground variant="blueprint" intensity="minimal" />
+
       <AtelierContainer>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
           {/* Left Text & Inclusions */}
@@ -90,18 +86,22 @@ export const BlueprintDeliverableSection = () => {
               subtitle="At the conclusion of your atelier session, we do not simply offer subjective opinions. We deliver a permanent personal style dossier tailored exclusively to your biology and ambitions."
             />
 
-            <ul className="list-none p-0 m-0 flex flex-col gap-4 mb-8">
-              {inclusions.map((item) => (
-                <li key={item} className="flex items-start gap-3">
-                  <span className="p-1 border border-border-medium bg-obsidian text-muted-gold mt-0.5 shrink-0">
-                    <Check size={14} />
-                  </span>
-                  <span className="text-ivory-muted text-sm sm:text-base font-light leading-relaxed">
-                    {item}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className="mb-8">
+              <p className="text-xs tracking-editorial-ultra text-muted-gold uppercase font-medium mb-4 flex items-center gap-2">
+                <Sparkles size={13} className="text-champagne" />
+                Inside your blueprint:
+              </p>
+              <ul className="list-none p-0 m-0 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {BLUEPRINT_INCLUSIONS.map((item) => (
+                  <li key={item} className="flex items-start gap-2.5">
+                    <span className="text-champagne text-xs mt-0.5 shrink-0 select-none">✦</span>
+                    <span className="text-ivory-muted text-xs sm:text-sm font-light leading-relaxed">
+                      {item}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
             <div className="p-4 bg-obsidian border border-border-subtle flex items-center gap-3 text-xs text-stone">
               <Shield size={16} className="text-muted-gold shrink-0" />

@@ -2,11 +2,13 @@ import React from 'react';
 import { ArrowUpRight } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { AtelierContainer, Eyebrow, Button } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 
 export const ConsultationCtaSection = () => {
   return (
     <section className="py-24 md:py-32 border-t border-border-subtle bg-gradient-to-b from-charcoal/60 to-obsidian relative overflow-hidden text-center">
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-muted-gold/5 rounded-full blur-[120px] pointer-events-none" />
+      {/* Consultation Invitation Atmosphere */}
+      <AtmosphericBackground variant="invitation" intensity="subtle" />
 
       <AtelierContainer size="narrow">
         <div className="mb-6 flex justify-center">

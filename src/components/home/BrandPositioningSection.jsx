@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { AtelierContainer, SectionHeading, Card } from '@/components/ui';
+import { AtmosphericBackground } from '@/components/background';
 import { gsap } from '@/lib/gsap';
 import { usePrefersReducedMotion } from '@/hooks/usePrefersReducedMotion';
 
@@ -58,7 +59,8 @@ export const BrandPositioningSection = () => {
   }, [prefersReducedMotion]);
 
   return (
-    <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative">
+    <section ref={sectionRef} className="py-20 md:py-28 border-t border-border-subtle bg-obsidian relative overflow-hidden">
+      <AtmosphericBackground variant="editorial" />
       <AtelierContainer>
         <SectionHeading
           eyebrow="The Atelier Philosophy"

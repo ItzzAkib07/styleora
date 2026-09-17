@@ -9,6 +9,19 @@
  *   3. The Beauty Atelier (₹1,499 INR)
  */
 
+export const BLUEPRINT_INCLUSIONS = [
+  'Personal Style Assessment',
+  'Body & Proportion Analysis',
+  'Personal Colour Direction',
+  'Signature Silhouettes & Fits',
+  'Personalised Shopping Guidance',
+  '20 Curated Outfit Ideas',
+  'Accessories & Footwear Guidance',
+  'Hair & Makeup Direction',
+  '30-Minute 1:1 Consultation',
+  'Personalised Digital Style Guide',
+];
+
 export const CORE_PACKAGE = {
   id: 'styleora_signature_blueprint',
   name: 'STYLEORA Signature Blueprint',
@@ -19,16 +32,7 @@ export const CORE_PACKAGE = {
   popular: true,
   badge: 'Core Experience',
   desc: 'Your personalised style identity, distilled into one considered blueprint — created around your features, proportions, colouring, lifestyle and the way you want to show up.',
-  features: [
-    '30-Minute Private 1:1 Virtual Stylist Consultation',
-    'Personalised Style Blueprint & Strategic Direction',
-    'Bespoke Colour Palette (Neutrals, Signatures, Accents & Evening)',
-    'Facial Framing, Neckline, Eyewear & Hair Guidance',
-    'Proportion Balancing, Body Shape & Silhouette Strategy',
-    'Personalised Outfit Curation (Professional, Casual, Ethnic & Occasion)',
-    'Wardrobe Foundations, Essential Garments & Layering Direction',
-    'Personalised Makeup, Grooming & Fragrance Finishing Notes',
-  ],
+  features: BLUEPRINT_INCLUSIONS,
 };
 
 export const ADD_ONS = [
