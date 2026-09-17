@@ -62,6 +62,12 @@ export const ConsultationPage = () => {
       : `idem_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
   );
 
+  // Track authoritative consultation status in a ref to protect async callbacks against stale closures
+  const latestStatusRef = useRef(createdConsultation?.status);
+  useEffect(() => {
+    latestStatusRef.current = createdConsultation?.status;
+  }, [createdConsultation?.status]);
+
   // Safely restore confirmation state from URL code parameter and sessionStorage on mount / navigation
   useEffect(() => {
     if (!codeParam) return;
@@ -190,6 +196,7 @@ export const ConsultationPage = () => {
 
     setIsSubmitting(true);
     setServerError(null);
+    setPaymentError(null);
 
     try {
       const payload = {
@@ -209,6 +216,8 @@ export const ConsultationPage = () => {
       );
 
       if (response?.data) {
+        latestStatusRef.current = response.data.status;
+        setPaymentError(null);
         setCreatedConsultation(response.data);
         try {
           sessionStorage.setItem('styleora_active_consultation', JSON.stringify(response.data));
@@ -241,7 +250,19 @@ export const ConsultationPage = () => {
   const handleInitiatePayment = async () => {
     if (!createdConsultation?.consultation_code || isPaying || isVerifying) return;
     setIsPaying(true);
+    // Requirement 1: Clear stale client-side payment failure/error state for the previous attempt
     setPaymentError(null);
+
+    // Transition consultation status to PAYMENT_PENDING on retry attempt
+    setCreatedConsultation((prev) => {
+      if (!prev || prev.status === 'PAYMENT_SUCCESS') return prev;
+      const updated = { ...prev, status: 'PAYMENT_PENDING' };
+      latestStatusRef.current = 'PAYMENT_PENDING';
+      try {
+        sessionStorage.setItem('styleora_active_consultation', JSON.stringify(updated));
+      } catch (e) {}
+      return updated;
+    });
 
     try {
       const scriptLoaded = await loadRazorpayScript();
@@ -277,6 +298,8 @@ export const ConsultationPage = () => {
           },
         },
         handler: async (response) => {
+          // Requirement 2: When Razorpay reports a successful payment, clear any client-side payment failure/error state
+          setPaymentError(null);
           setIsVerifying(true);
           try {
             const verifyRes = await paymentService.verifyPayment({
@@ -287,6 +310,11 @@ export const ConsultationPage = () => {
             });
 
             if (verifyRes?.success && verifyRes?.data) {
+              // Requirement 3: When server-side payment verification succeeds,
+              // immediately update ref to PAYMENT_SUCCESS and clear error state defensively.
+              // Use authoritative successful response to render the final state.
+              latestStatusRef.current = 'PAYMENT_SUCCESS';
+              setPaymentError(null);
               setCreatedConsultation((prev) => {
                 const updated = {
                   ...prev,
@@ -302,12 +330,15 @@ export const ConsultationPage = () => {
               });
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
+              // Requirement 4: If payment verification fails, display appropriate error state
               throw new Error(verifyRes?.error?.message || 'Payment verification failed.');
             }
           } catch (err) {
-            setPaymentError(
-              err?.message || 'Payment verification failed. Please contact concierge support with your reference code.'
-            );
+            if (latestStatusRef.current !== 'PAYMENT_SUCCESS') {
+              setPaymentError(
+                err?.message || 'Payment verification failed. Please contact concierge support with your reference code.'
+              );
+            }
           } finally {
             setIsVerifying(false);
             setIsPaying(false);
@@ -317,38 +348,52 @@ export const ConsultationPage = () => {
 
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', async (response) => {
-        const errorDesc =
-          response.error?.description || 'Payment was unsuccessful or declined by your provider. You may retry.';
-        setPaymentError(errorDesc);
-        setIsPaying(false);
-
-        // Authoritatively report payment failure to backend to update ledger state to PAYMENT_FAILED
-        try {
-          await paymentService.reportPaymentFailure({
-            consultation_code: createdConsultation.consultation_code,
-            razorpay_order_id: response.error?.metadata?.order_id || orderData.order_id,
-            error_code: response.error?.code,
-            error_description: errorDesc,
-            error_source: response.error?.source,
-            error_step: response.error?.step,
-            error_reason: response.error?.reason,
-          });
-        } catch (err) {
-          console.warn('Failed to record checkout failure in ledger:', err);
+        // Race condition protection:
+        // If payment has already succeeded or verified as PAYMENT_SUCCESS,
+        // ignore any late or out-of-order payment.failed callbacks.
+        if (latestStatusRef.current === 'PAYMENT_SUCCESS') {
+          return;
         }
 
-        setCreatedConsultation((prev) => {
-          if (!prev || prev.status === 'PAYMENT_SUCCESS') return prev;
-          const updated = { ...prev, status: 'PAYMENT_FAILED' };
+        const errorDesc =
+          response.error?.description || 'Payment was unsuccessful or declined by your provider. You may retry.';
+        
+        setPaymentError(() => (latestStatusRef.current === 'PAYMENT_SUCCESS' ? null : errorDesc));
+        setIsPaying(false);
+
+        // Authoritatively report payment failure to backend to update ledger state to PAYMENT_FAILED,
+        // only if current state is not PAYMENT_SUCCESS
+        if (latestStatusRef.current !== 'PAYMENT_SUCCESS') {
           try {
-            sessionStorage.setItem('styleora_active_consultation', JSON.stringify(updated));
-          } catch (e) {}
-          return updated;
-        });
+            await paymentService.reportPaymentFailure({
+              consultation_code: createdConsultation.consultation_code,
+              razorpay_order_id: response.error?.metadata?.order_id || orderData.order_id,
+              error_code: response.error?.code,
+              error_description: errorDesc,
+              error_source: response.error?.source,
+              error_step: response.error?.step,
+              error_reason: response.error?.reason,
+            });
+          } catch (err) {
+            console.warn('Failed to record checkout failure in ledger:', err);
+          }
+
+          setCreatedConsultation((prev) => {
+            if (!prev || prev.status === 'PAYMENT_SUCCESS' || latestStatusRef.current === 'PAYMENT_SUCCESS') return prev;
+            const updated = { ...prev, status: 'PAYMENT_FAILED' };
+            latestStatusRef.current = 'PAYMENT_FAILED';
+            try {
+              sessionStorage.setItem('styleora_active_consultation', JSON.stringify(updated));
+            } catch (e) {}
+            return updated;
+          });
+        }
       });
       rzp.open();
     } catch (err) {
-      setPaymentError(err?.message || 'Payment initialization error. Please try again.');
+      if (latestStatusRef.current !== 'PAYMENT_SUCCESS') {
+        setPaymentError(err?.message || 'Payment initialization error. Please try again.');
+      }
       setIsPaying(false);
     }
   };
@@ -357,6 +402,7 @@ export const ConsultationPage = () => {
     try {
       sessionStorage.removeItem('styleora_active_consultation');
     } catch (e) {}
+    latestStatusRef.current = null;
     setSearchParams({}, { replace: true });
     setCreatedConsultation(null);
     setSelectedAddOnIds([]);
@@ -467,8 +513,8 @@ export const ConsultationPage = () => {
                   )}
                 </div>
 
-                {/* Payment Error Banner if applicable */}
-                {paymentError && (
+                {/* Payment Error Banner if applicable (never rendered if status is PAYMENT_SUCCESS) */}
+                {paymentError && createdConsultation.status !== 'PAYMENT_SUCCESS' && (
                   <div className="bg-red-950/40 border border-red-800/60 p-4 mb-8 text-red-200 text-xs flex items-start gap-3">
                     <AlertCircle size={16} className="text-red-400 shrink-0 mt-0.5" />
                     <div className="flex-1">
