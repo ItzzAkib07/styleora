@@ -13,6 +13,7 @@ from app.models.consultation import Consultation, ConsultationStatus
 from app.models.payment import Payment, PaymentStatus
 from app.models.webhook_event import WebhookEvent
 from app.schemas.payment import (
+    PaymentFailRequest,
     PaymentOrderResponseData,
     PaymentVerifyRequest,
     PaymentVerifyResponseData,
@@ -142,8 +143,8 @@ async def create_payment_order(
     )
     db.add(payment)
 
-    # Transition consultation to PAYMENT_PENDING if currently in CREATED
-    if consultation.status == ConsultationStatus.CREATED:
+    # Transition consultation to PAYMENT_PENDING if currently in CREATED or PAYMENT_FAILED
+    if consultation.status in [ConsultationStatus.CREATED, ConsultationStatus.PAYMENT_FAILED]:
         consultation.status = ConsultationStatus.PAYMENT_PENDING
 
     # 6. Audit Trail
@@ -214,20 +215,6 @@ async def verify_payment(
             code="PAYMENT_ORDER_MISMATCH",
         )
 
-    # Idempotent replay: if already successfully verified, return current state
-    if payment.status == PaymentStatus.SUCCESS and consultation.status == ConsultationStatus.PAYMENT_SUCCESS:
-        logger.info(f"Idempotent verification replay for consultation {cleaned_code}")
-        return PaymentVerifyResponseData(
-            consultation_code=consultation.consultation_code,
-            payment_id=payment.provider_payment_id or data.razorpay_payment_id,
-            order_id=payment.provider_order_id,
-            amount=payment.amount,
-            amount_inr=int(payment.amount // 100),
-            currency=payment.currency,
-            status=ConsultationStatus.PAYMENT_SUCCESS.value,
-            paid_at=payment.paid_at or datetime.datetime.now(datetime.timezone.utc),
-        )
-
     # Amount Reconciliation
     expected_amount_paise = int(consultation.total_price_inr * 100)
     if payment.amount != expected_amount_paise:
@@ -237,6 +224,7 @@ async def verify_payment(
         )
 
     # Cryptographic Signature Verification using SERVER-STORED order ID
+    # Must be validated BEFORE checking idempotency to prevent signature tampering or replay bypasses.
     is_valid = razorpay_client.verify_payment_signature(
         order_id=payment.provider_order_id,
         payment_id=data.razorpay_payment_id,
@@ -244,7 +232,13 @@ async def verify_payment(
     )
 
     if not is_valid:
-        payment.status = PaymentStatus.FAILED
+        # Monotonic safety: Never downgrade an already completed or paid payment in the database,
+        # but ALWAYS reject tampered / invalid signatures with HTTP 400.
+        if payment.status != PaymentStatus.SUCCESS:
+            payment.status = PaymentStatus.FAILED
+            if consultation.status != ConsultationStatus.PAYMENT_SUCCESS:
+                consultation.status = ConsultationStatus.PAYMENT_FAILED
+
         audit_failed = AuditLog(
             consultation_id=consultation.id,
             event=AuditEvent.PAYMENT_FAILED,
@@ -266,11 +260,50 @@ async def verify_payment(
             status_code=400,
         )
 
+    # Idempotent replay: if signature is authentic and transaction already confirmed, return ledger state
+    if payment.status == PaymentStatus.SUCCESS and consultation.status == ConsultationStatus.PAYMENT_SUCCESS:
+        logger.info(f"Idempotent verification replay for consultation {cleaned_code}")
+        return PaymentVerifyResponseData(
+            consultation_code=consultation.consultation_code,
+            payment_id=payment.provider_payment_id or data.razorpay_payment_id,
+            order_id=payment.provider_order_id,
+            amount=payment.amount,
+            amount_inr=int(payment.amount // 100),
+            currency=payment.currency,
+            status=ConsultationStatus.PAYMENT_SUCCESS.value,
+            paid_at=payment.paid_at or datetime.datetime.now(datetime.timezone.utc),
+            payment_method=payment.payment_method,
+        )
+
+    # Fetch authoritative payment details from Razorpay gateway
+    payment_method: Optional[str] = None
+    razorpay_payment_created_at: Optional[int] = None
+    try:
+        payment_details = await razorpay_client.fetch_payment(data.razorpay_payment_id)
+        if payment_details:
+            payment_method = payment_details.get("method")
+            razorpay_payment_created_at = payment_details.get("created_at")
+    except Exception as exc:
+        logger.warning(
+            f"Unable to fetch payment details from Razorpay for {data.razorpay_payment_id}: {str(exc)}"
+        )
+
     # Atomic State Update: Success Transitions
+    # Note on Timestamps & Event Semantics:
+    # - STYLEORA consultation.created_at: Timezone-aware UTC timestamp when consultation was created in local DB
+    # - STYLEORA consultation.updated_at: Timezone-aware UTC timestamp updated on modification
+    # - STYLEORA payment.created_at: Timezone-aware UTC timestamp when payment record was prepared for order
+    # - STYLEORA payment.updated_at: Timezone-aware UTC timestamp when payment was updated
+    # - Razorpay order creation timestamp: Unix epoch timestamp in order entity
+    # - Razorpay payment creation timestamp: Unix epoch timestamp in payment entity (razorpay_payment_created_at)
+    # - actual successful payment/capture timestamp: Razorpay API does not provide a separate captured_at field
+    # - STYLEORA payment.paid_at: Timezone-aware UTC timestamp when STYLEORA verified and recorded payment confirmation
     now = datetime.datetime.now(datetime.timezone.utc)
     payment.status = PaymentStatus.SUCCESS
     payment.provider_payment_id = data.razorpay_payment_id
     payment.paid_at = now
+    if payment_method:
+        payment.payment_method = payment_method
 
     consultation.status = ConsultationStatus.PAYMENT_SUCCESS
 
@@ -284,6 +317,8 @@ async def verify_payment(
             "provider_order_id": payment.provider_order_id,
             "provider_payment_id": data.razorpay_payment_id,
             "amount_paise": payment.amount,
+            "payment_method": payment_method,
+            "razorpay_payment_created_at": razorpay_payment_created_at,
             "client_ip": client_ip or "unknown",
         },
     )
@@ -298,6 +333,7 @@ async def verify_payment(
             "provider_payment_id": data.razorpay_payment_id,
             "amount_paise": payment.amount,
             "amount_inr": consultation.total_price_inr,
+            "payment_method": payment_method,
         },
     )
     db.add(audit_verified)
@@ -318,6 +354,7 @@ async def verify_payment(
         currency=payment.currency,
         status=ConsultationStatus.PAYMENT_SUCCESS.value,
         paid_at=now,
+        payment_method=payment_method,
     )
 
 
@@ -406,12 +443,15 @@ async def process_webhook(
                         f"Webhook amount mismatch for order {provider_order_id}: expected {expected_amount}, got {event_amount}"
                     )
                 else:
+                    method = payment_entity.get("method")
                     # Monotonic state transition: never downgrade if already SUCCESS
                     if payment.status != PaymentStatus.SUCCESS:
                         payment.status = PaymentStatus.SUCCESS
                         if provider_payment_id:
                             payment.provider_payment_id = provider_payment_id
                         payment.paid_at = datetime.datetime.now(datetime.timezone.utc)
+                        if method:
+                            payment.payment_method = method
 
                         consultation.status = ConsultationStatus.PAYMENT_SUCCESS
 
@@ -426,12 +466,15 @@ async def process_webhook(
                                 "provider_order_id": provider_order_id,
                                 "provider_payment_id": provider_payment_id,
                                 "amount": event_amount,
+                                "payment_method": method,
                             },
                         )
                         db.add(audit_webhook)
                         logger.info(
                             f"Webhook {event_id} successfully marked consultation {consultation.consultation_code} as paid"
                         )
+                    elif method and not payment.payment_method:
+                        payment.payment_method = method
 
     elif event_type == "payment.failed":
         payment_entity = payload.get("payload", {}).get("payment", {}).get("entity", {})
@@ -448,6 +491,9 @@ async def process_webhook(
             # Only mark payment as failed if not already SUCCESS
             if payment and payment.status != PaymentStatus.SUCCESS:
                 payment.status = PaymentStatus.FAILED
+                if payment.consultation and payment.consultation.status != ConsultationStatus.PAYMENT_SUCCESS:
+                    payment.consultation.status = ConsultationStatus.PAYMENT_FAILED
+
                 audit_fail = AuditLog(
                     consultation_id=payment.consultation.id,
                     event=AuditEvent.PAYMENT_FAILED,
@@ -469,4 +515,90 @@ async def process_webhook(
         "status": "processed",
         "event_id": event_id,
         "event_type": event_type,
+    }
+
+
+async def record_payment_failure(
+    db: AsyncSession,
+    data: PaymentFailRequest,
+    client_ip: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Records payment checkout failure reported by client.
+    Enforces monotonic progression: never downgrades an already confirmed PAYMENT_SUCCESS consultation.
+    Webhooks remain authoritative; this endpoint captures immediate checkout drop-off and error telemetry.
+    """
+    cleaned_code = data.consultation_code.strip().upper()
+
+    stmt = (
+        select(Consultation)
+        .options(selectinload(Consultation.payments))
+        .where(Consultation.consultation_code == cleaned_code)
+    )
+    res = await db.execute(stmt)
+    consultation = res.scalar_one_or_none()
+
+    if not consultation:
+        raise NotFoundException(
+            message=f"Consultation with reference '{cleaned_code}' was not found.",
+            code="CONSULTATION_NOT_FOUND",
+        )
+
+    # Monotonic safety: Never downgrade an already completed or paid consultation
+    if consultation.status == ConsultationStatus.PAYMENT_SUCCESS:
+        logger.info(
+            f"Ignoring client failure report for consultation {cleaned_code}: already PAYMENT_SUCCESS"
+        )
+        return {
+            "success": True,
+            "consultation_code": consultation.consultation_code,
+            "status": consultation.status.value,
+            "message": "Consultation payment was already verified successfully.",
+        }
+
+    # Find relevant payment
+    target_payment = None
+    if data.razorpay_order_id:
+        target_payment = next(
+            (p for p in consultation.payments if p.provider_order_id == data.razorpay_order_id),
+            None,
+        )
+    if not target_payment and consultation.payments:
+        # Pick the most recent non-success payment
+        non_success = [p for p in consultation.payments if p.status != PaymentStatus.SUCCESS]
+        if non_success:
+            target_payment = non_success[-1]
+
+    if target_payment and target_payment.status != PaymentStatus.SUCCESS:
+        target_payment.status = PaymentStatus.FAILED
+
+    # Transition consultation state to PAYMENT_FAILED
+    consultation.status = ConsultationStatus.PAYMENT_FAILED
+
+    audit_fail = AuditLog(
+        consultation_id=consultation.id,
+        event=AuditEvent.PAYMENT_FAILED,
+        actor_type=AuditActorType.CUSTOMER,
+        actor_id=consultation.email,
+        log_metadata={
+            "consultation_code": consultation.consultation_code,
+            "provider_order_id": target_payment.provider_order_id if target_payment else data.razorpay_order_id,
+            "error_code": data.error_code,
+            "error_description": data.error_description,
+            "error_source": data.error_source,
+            "error_step": data.error_step,
+            "error_reason": data.error_reason,
+            "client_ip": client_ip or "unknown",
+            "reported_by": "frontend_checkout",
+        },
+    )
+    db.add(audit_fail)
+    await db.commit()
+
+    logger.info(f"Recorded client payment failure for consultation {cleaned_code}")
+    return {
+        "success": True,
+        "consultation_code": consultation.consultation_code,
+        "status": ConsultationStatus.PAYMENT_FAILED.value,
+        "message": "Payment failure recorded in ledger.",
     }

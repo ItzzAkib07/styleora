@@ -91,3 +91,54 @@ class PaymentVerifyResponseData(BaseModel):
     currency: str = Field(..., description="Currency code")
     status: str = Field(..., description="Confirmed consultation lifecycle status")
     paid_at: datetime.datetime = Field(..., description="Timestamp of payment confirmation")
+    payment_method: Optional[str] = Field(None, description="Authoritative payment method (e.g. upi, card, netbanking)")
+
+
+class PaymentFailRequest(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    consultation_code: str = Field(
+        ...,
+        min_length=5,
+        max_length=32,
+        description="Official consultation reference code",
+    )
+    razorpay_order_id: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="Razorpay order identifier if available",
+    )
+    error_code: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="Gateway failure error code",
+    )
+    error_description: Optional[str] = Field(
+        None,
+        max_length=500,
+        description="Customer-facing or gateway error description",
+    )
+    error_source: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="Source of the error (e.g. customer, gateway)",
+    )
+    error_step: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="Step at which payment failed",
+    )
+    error_reason: Optional[str] = Field(
+        None,
+        max_length=128,
+        description="Specific reason code from payment provider",
+    )
+
+    @field_validator("consultation_code")
+    @classmethod
+    def validate_code(cls, v: str) -> str:
+        cleaned = v.strip().upper()
+        if not cleaned:
+            raise ValueError("Consultation code cannot be empty.")
+        return cleaned
+

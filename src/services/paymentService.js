@@ -24,4 +24,16 @@ export const paymentService = {
       body: JSON.stringify(verificationPayload),
     });
   },
+
+  /**
+   * Reports checkout failure from Razorpay Standard Checkout to the backend
+   * to record telemetry and transition consultation to PAYMENT_FAILED.
+   */
+  async reportPaymentFailure(failurePayload) {
+    return apiClient('/payments/fail', {
+      method: 'POST',
+      body: JSON.stringify(failurePayload),
+    });
+  },
 };
+

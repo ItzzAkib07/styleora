@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.limiter import limiter
 from app.db.session import get_db
 from app.schemas.payment import (
+    PaymentFailRequest,
     PaymentOrderCreate,
     PaymentOrderResponseData,
     PaymentVerifyRequest,
@@ -72,6 +73,35 @@ async def verify_payment(
         success=True,
         data=verification_data,
         message="Payment verified successfully. Atelier reservation confirmed.",
+    )
+
+
+@router.post(
+    "/fail",
+    response_model=APIResponse[Dict[str, Any]],
+    status_code=status.HTTP_200_OK,
+    summary="Record client-side payment failure reported by checkout",
+    description=(
+        "Receives checkout failure feedback from the client, logs failure telemetry, "
+        "and transitions consultation to PAYMENT_FAILED if not already confirmed."
+    ),
+)
+@limiter.limit("15/minute")
+async def report_payment_failure(
+    request: Request,
+    data: PaymentFailRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    client_ip = request.client.host if request.client else "unknown"
+    result = await payment_service.record_payment_failure(
+        db=db,
+        data=data,
+        client_ip=client_ip,
+    )
+    return APIResponse(
+        success=True,
+        data=result,
+        message="Payment failure recorded in ledger.",
     )
 
 

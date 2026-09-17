@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useRef, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Check,
   Shield,
@@ -20,18 +20,23 @@ import {
   Info,
   Lock,
   CreditCard,
+  RotateCcw,
 } from 'lucide-react';
 import { ROUTES } from '@/constants/routes';
 import { CORE_PACKAGE, ADD_ONS, getAddOnById } from '@/constants/packages';
 import { consultationService } from '@/services/consultationService';
 import { paymentService } from '@/services/paymentService';
 import { loadRazorpayScript } from '@/utils/razorpay';
+import { formatDateTime } from '@/utils/dateTime';
 import { AtelierContainer, SectionHeading, Card, Button, SEO } from '@/components/ui';
 
 const EMAIL_REGEX = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
 const PHONE_REGEX = /^\+?[0-9\s\-()]{8,25}$/;
 
 export const ConsultationPage = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const codeParam = searchParams.get('code');
+
   const [selectedAddOnIds, setSelectedAddOnIds] = useState([]);
   const [formData, setFormData] = useState({
     customer_name: '',
@@ -56,6 +61,60 @@ export const ConsultationPage = () => {
       ? crypto.randomUUID()
       : `idem_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`
   );
+
+  // Safely restore confirmation state from URL code parameter and sessionStorage on mount / navigation
+  useEffect(() => {
+    if (!codeParam) return;
+    const cleanCode = codeParam.trim().toUpperCase();
+
+    // 1. Try restoring complete cached consultation from sessionStorage
+    try {
+      const saved = sessionStorage.getItem('styleora_active_consultation');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed?.consultation_code === cleanCode) {
+          setCreatedConsultation(parsed);
+          return;
+        }
+      }
+    } catch (err) {
+      console.warn('Could not parse cached consultation from sessionStorage:', err);
+    }
+
+    // 2. Otherwise retrieve public lookup details from authoritative ledger without duplicate creation
+    let isCancelled = false;
+    consultationService
+      .getConsultationByCode(cleanCode)
+      .then((res) => {
+        if (!isCancelled && res?.data) {
+          const publicData = res.data;
+          setCreatedConsultation((prev) => {
+            if (prev?.consultation_code === cleanCode) return prev;
+            return {
+              consultation_code: publicData.consultation_code,
+              package_id: publicData.package_id,
+              package_name: publicData.package_name,
+              package_price: publicData.package_price,
+              total_price_formatted: publicData.total_price_formatted,
+              status: publicData.status,
+              created_at: publicData.created_at,
+              selected_add_ons: (publicData.selected_add_ons || []).map((name) => ({
+                add_on_id: name,
+                name,
+                price: '',
+              })),
+            };
+          });
+        }
+      })
+      .catch((err) => {
+        console.warn('Could not load consultation from ledger code:', err);
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [codeParam]);
 
   const corePackage = CORE_PACKAGE;
   const selectedAddOns = ADD_ONS.filter((addon) => selectedAddOnIds.includes(addon.id));
@@ -151,6 +210,10 @@ export const ConsultationPage = () => {
 
       if (response?.data) {
         setCreatedConsultation(response.data);
+        try {
+          sessionStorage.setItem('styleora_active_consultation', JSON.stringify(response.data));
+        } catch (e) {}
+        setSearchParams({ code: response.data.consultation_code }, { replace: true });
         // Rotate idempotency key for subsequent consultation bookings
         idempotencyKeyRef.current =
           typeof crypto !== 'undefined' && crypto.randomUUID
@@ -224,12 +287,19 @@ export const ConsultationPage = () => {
             });
 
             if (verifyRes?.success && verifyRes?.data) {
-              setCreatedConsultation((prev) => ({
-                ...prev,
-                status: 'PAYMENT_SUCCESS',
-                payment_id: verifyRes.data.payment_id,
-                paid_at: verifyRes.data.paid_at,
-              }));
+              setCreatedConsultation((prev) => {
+                const updated = {
+                  ...prev,
+                  status: 'PAYMENT_SUCCESS',
+                  payment_id: verifyRes.data.payment_id,
+                  paid_at: verifyRes.data.paid_at,
+                  payment_method: verifyRes.data.payment_method,
+                };
+                try {
+                  sessionStorage.setItem('styleora_active_consultation', JSON.stringify(updated));
+                } catch (e) {}
+                return updated;
+              });
               window.scrollTo({ top: 0, behavior: 'smooth' });
             } else {
               throw new Error(verifyRes?.error?.message || 'Payment verification failed.');
@@ -246,11 +316,35 @@ export const ConsultationPage = () => {
       };
 
       const rzp = new window.Razorpay(options);
-      rzp.on('payment.failed', (response) => {
-        setPaymentError(
-          response.error?.description || 'Payment was unsuccessful or declined by your provider. You may retry.'
-        );
+      rzp.on('payment.failed', async (response) => {
+        const errorDesc =
+          response.error?.description || 'Payment was unsuccessful or declined by your provider. You may retry.';
+        setPaymentError(errorDesc);
         setIsPaying(false);
+
+        // Authoritatively report payment failure to backend to update ledger state to PAYMENT_FAILED
+        try {
+          await paymentService.reportPaymentFailure({
+            consultation_code: createdConsultation.consultation_code,
+            razorpay_order_id: response.error?.metadata?.order_id || orderData.order_id,
+            error_code: response.error?.code,
+            error_description: errorDesc,
+            error_source: response.error?.source,
+            error_step: response.error?.step,
+            error_reason: response.error?.reason,
+          });
+        } catch (err) {
+          console.warn('Failed to record checkout failure in ledger:', err);
+        }
+
+        setCreatedConsultation((prev) => {
+          if (!prev || prev.status === 'PAYMENT_SUCCESS') return prev;
+          const updated = { ...prev, status: 'PAYMENT_FAILED' };
+          try {
+            sessionStorage.setItem('styleora_active_consultation', JSON.stringify(updated));
+          } catch (e) {}
+          return updated;
+        });
       });
       rzp.open();
     } catch (err) {
@@ -260,6 +354,10 @@ export const ConsultationPage = () => {
   };
 
   const handleResetForm = () => {
+    try {
+      sessionStorage.removeItem('styleora_active_consultation');
+    } catch (e) {}
+    setSearchParams({}, { replace: true });
     setCreatedConsultation(null);
     setSelectedAddOnIds([]);
     setFormData({
@@ -313,6 +411,19 @@ export const ConsultationPage = () => {
                       <p className="text-ivory-muted text-sm sm:text-base font-light max-w-xl mx-auto leading-relaxed">
                         Your private styling investment has been verified by the STYLEORA atelier ledger. 
                         Your bespoke 1:1 consultation is officially secured.
+                      </p>
+                    </>
+                  ) : createdConsultation.status === 'PAYMENT_FAILED' ? (
+                    <>
+                      <span className="inline-flex items-center gap-2 px-3 py-1 bg-red-950/40 border border-red-800/60 text-red-300 text-[0.65rem] tracking-editorial-ultra uppercase mb-4 font-semibold">
+                        <AlertCircle size={13} className="text-red-400" />
+                        ATELIER LEDGER // PAYMENT INTERRUPTED OR FAILED
+                      </span>
+                      <h1 className="font-editorial text-3xl sm:text-5xl text-warm-ivory font-normal mb-3">
+                        Payment Incomplete.
+                      </h1>
+                      <p className="text-ivory-muted text-sm sm:text-base font-light max-w-xl mx-auto leading-relaxed">
+                        Your styling reservation is preserved in the atelier ledger. You may retry secure checkout below with your preferred payment method.
                       </p>
                     </>
                   ) : (
@@ -390,6 +501,11 @@ export const ConsultationPage = () => {
                         <CheckCheck size={13} className="text-atelier-success" />
                         PAYMENT_SUCCESS
                       </span>
+                    ) : createdConsultation.status === 'PAYMENT_FAILED' ? (
+                      <span className="inline-flex items-center gap-1.5 text-xs text-red-300 bg-red-950/40 px-2.5 py-1 border border-red-800/60 font-cinzel tracking-wider">
+                        <AlertCircle size={13} className="text-red-400" />
+                        PAYMENT_FAILED
+                      </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 text-xs text-champagne bg-surface-subtle px-2.5 py-1 border border-border-subtle font-cinzel tracking-wider">
                         <Clock size={13} className="text-muted-gold" />
@@ -428,6 +544,27 @@ export const ConsultationPage = () => {
                     <div className="sm:col-span-2 bg-surface-subtle/40 p-3 border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
                       <span className="text-stone tracking-editorial-wide uppercase">Gateway Transaction ID:</span>
                       <span className="font-mono text-champagne select-all">{createdConsultation.payment_id}</span>
+                    </div>
+                  )}
+
+                  {createdConsultation.payment_method && (
+                    <div className="sm:col-span-2 bg-surface-subtle/40 p-3 border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                      <span className="text-stone tracking-editorial-wide uppercase">Authoritative Payment Method:</span>
+                      <span className="font-mono text-champagne uppercase font-semibold">{createdConsultation.payment_method}</span>
+                    </div>
+                  )}
+
+                  {createdConsultation.paid_at && (
+                    <div className="sm:col-span-2 bg-surface-subtle/40 p-3 border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                      <span className="text-stone tracking-editorial-wide uppercase">Payment Verified (IST):</span>
+                      <span className="font-mono text-warm-ivory">{formatDateTime(createdConsultation.paid_at)}</span>
+                    </div>
+                  )}
+
+                  {createdConsultation.created_at && !createdConsultation.paid_at && (
+                    <div className="sm:col-span-2 bg-surface-subtle/40 p-3 border border-border-subtle flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                      <span className="text-stone tracking-editorial-wide uppercase">Reservation Initiated (IST):</span>
+                      <span className="font-mono text-warm-ivory">{formatDateTime(createdConsultation.created_at)}</span>
                     </div>
                   )}
 
@@ -519,6 +656,13 @@ export const ConsultationPage = () => {
                           <>
                             <Loader2 size={18} className="animate-spin" />
                             <span>{isVerifying ? 'Verifying Payment...' : 'Connecting to Gateway...'}</span>
+                          </>
+                        ) : createdConsultation.status === 'PAYMENT_FAILED' ? (
+                          <>
+                            <RotateCcw size={16} />
+                            <span>
+                              Retry Secure Checkout ({createdConsultation.total_price_formatted || createdConsultation.package_price})
+                            </span>
                           </>
                         ) : (
                           <>

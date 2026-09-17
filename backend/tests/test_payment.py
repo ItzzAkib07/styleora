@@ -639,10 +639,10 @@ async def test_webhook_payment_failed_event(client: AsyncClient, db_session: Asy
     p = (await db_session.execute(stmt_p)).scalar_one()
     assert p.status == PaymentStatus.FAILED
 
-    # Consultation remains retryable (PAYMENT_PENDING)
+    # Consultation transitions to PAYMENT_FAILED
     stmt_c = select(Consultation).where(Consultation.consultation_code == code)
     c = (await db_session.execute(stmt_c)).scalar_one()
-    assert c.status == ConsultationStatus.PAYMENT_PENDING
+    assert c.status == ConsultationStatus.PAYMENT_FAILED
 
 
 @pytest.mark.asyncio
@@ -935,3 +935,320 @@ async def test_database_partial_unique_constraint_on_success(db_session: AsyncSe
     with pytest.raises(IntegrityError):
         await db_session.commit()
     await db_session.rollback()
+
+
+# =============================================================================
+# PHASE 2 REGRESSION TESTS: SIGNATURE SECURITY, STATE TRANSITIONS & TIMESTAMPS
+# =============================================================================
+
+@pytest.mark.asyncio
+async def test_invalid_signature_replay_on_already_successful_payment_rejected(
+    client: AsyncClient, db_session: AsyncSession
+):
+    """
+    TEST 4B REGRESSION:
+    Verifies that HMAC-SHA256 signature verification occurs BEFORE any idempotency short-circuit.
+    Even if a payment is already confirmed as SUCCESS, replaying with a tampered or invalid signature
+    MUST be rejected with HTTP 400 (PAYMENT_SIGNATURE_INVALID) and MUST NOT corrupt existing ledger status.
+    """
+    create_res = await client.post(
+        "/api/v1/consultations",
+        json={
+            "customer_name": "Signature Replay Target",
+            "email": "sig_replay@atelier.luxury",
+            "phone": "+91 98111 22222",
+            "address": "Mayfair High Street, London",
+            "package_id": "styleora_signature_blueprint",
+        },
+    )
+    code = create_res.json()["data"]["consultation_code"]
+
+    order_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    order_id = order_res.json()["data"]["order_id"]
+    payment_id = f"pay_legit_{uuid.uuid4().hex[:10]}"
+    legit_sig = make_payment_signature(order_id, payment_id)
+
+    # 1. Initial valid verification succeeds
+    v1 = await client.post(
+        "/api/v1/payments/verify",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": legit_sig,
+        },
+    )
+    assert v1.status_code == 200
+    assert v1.json()["data"]["status"] == "PAYMENT_SUCCESS"
+
+    # 2. Legitimate idempotent replay with identical valid signature succeeds
+    v2 = await client.post(
+        "/api/v1/payments/verify",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": legit_sig,
+        },
+    )
+    assert v2.status_code == 200
+    assert v2.json()["data"]["status"] == "PAYMENT_SUCCESS"
+
+    # 3. Tampered replay with invalid signature MUST be rejected with HTTP 400
+    v_bad = await client.post(
+        "/api/v1/payments/verify",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": "tampered_signature_hex_000000000000000000000000",
+        },
+    )
+    assert v_bad.status_code == 400
+    assert v_bad.json()["error"]["code"] == "PAYMENT_SIGNATURE_INVALID"
+
+    # 4. Confirm database record was NOT corrupted or downgraded
+    stmt_c = select(Consultation).where(Consultation.consultation_code == code)
+    c = (await db_session.execute(stmt_c)).scalar_one()
+    assert c.status == ConsultationStatus.PAYMENT_SUCCESS
+
+    stmt_p = select(Payment).where(Payment.provider_order_id == order_id)
+    p = (await db_session.execute(stmt_p)).scalar_one()
+    assert p.status == PaymentStatus.SUCCESS
+
+
+@pytest.mark.asyncio
+async def test_payment_verification_persists_payment_method_and_timestamps(
+    client: AsyncClient, db_session: AsyncSession
+):
+    """
+    TEST 5 & 6 REGRESSION:
+    Verifies that payment verification:
+    1. Fetches and persists the authoritative provider payment method (e.g. 'upi').
+    2. Records paid_at as a timezone-aware UTC datetime.
+    3. Retains distinct event semantics between local DB timestamps and provider timestamps.
+    """
+    create_res = await client.post(
+        "/api/v1/consultations",
+        json={
+            "customer_name": "Payment Method Client",
+            "email": "method_client@atelier.luxury",
+            "phone": "+91 98222 55555",
+            "address": "Kensington Palace Gardens, London",
+            "package_id": "styleora_signature_blueprint",
+        },
+    )
+    code = create_res.json()["data"]["consultation_code"]
+
+    order_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    order_id = order_res.json()["data"]["order_id"]
+    payment_id = f"pay_method_{uuid.uuid4().hex[:10]}"
+    sig = make_payment_signature(order_id, payment_id)
+
+    verify_res = await client.post(
+        "/api/v1/payments/verify",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": sig,
+        },
+    )
+    assert verify_res.status_code == 200
+    data = verify_res.json()["data"]
+    assert data["payment_method"] == "upi"
+    assert "paid_at" in data
+    assert data["paid_at"] is not None
+
+    # Inspect DB record
+    stmt_p = select(Payment).where(Payment.provider_order_id == order_id)
+    p = (await db_session.execute(stmt_p)).scalar_one()
+    assert p.payment_method == "upi"
+    assert p.paid_at is not None
+    assert p.created_at is not None
+    # Verify UTC serialized representation in API schema response
+    assert data["paid_at"].endswith("Z") or "+00:00" in data["paid_at"]
+
+    # Inspect audit log metadata
+    stmt_audit = (
+        select(AuditLog)
+        .where(AuditLog.consultation_id == p.consultation_id, AuditLog.event == AuditEvent.PAYMENT_VERIFIED)
+    )
+    audit = (await db_session.execute(stmt_audit)).scalar_one()
+    assert audit.log_metadata.get("payment_method") == "upi"
+    assert "razorpay_payment_created_at" in audit.log_metadata
+
+
+@pytest.mark.asyncio
+async def test_report_payment_failure_endpoint_transitions_state(
+    client: AsyncClient, db_session: AsyncSession
+):
+    """
+    TEST 1 REGRESSION:
+    Verifies that the client-facing failure reporting endpoint POST /api/v1/payments/fail:
+    1. Transitions consultation.status from PAYMENT_PENDING to PAYMENT_FAILED.
+    2. Transitions payment.status to FAILED.
+    3. Records telemetry in the audit log.
+    """
+    create_res = await client.post(
+        "/api/v1/consultations",
+        json={
+            "customer_name": "Failure Telemetry Client",
+            "email": "fail_telem@atelier.luxury",
+            "phone": "+91 98333 66666",
+            "address": "Park Lane, London",
+            "package_id": "styleora_signature_blueprint",
+        },
+    )
+    code = create_res.json()["data"]["consultation_code"]
+
+    order_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    order_id = order_res.json()["data"]["order_id"]
+
+    # Initial state should be PAYMENT_PENDING
+    stmt_c = select(Consultation).where(Consultation.consultation_code == code)
+    c_init = (await db_session.execute(stmt_c)).scalar_one()
+    assert c_init.status == ConsultationStatus.PAYMENT_PENDING
+
+    # Report failure from checkout
+    fail_res = await client.post(
+        "/api/v1/payments/fail",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "error_code": "BAD_REQUEST_ERROR",
+            "error_description": "Payment was declined by card issuing bank.",
+            "error_source": "customer",
+            "error_step": "payment_authentication",
+            "error_reason": "payment_failed",
+        },
+    )
+    assert fail_res.status_code == 200
+    assert fail_res.json()["data"]["status"] == "PAYMENT_FAILED"
+
+    # Confirm DB states
+    stmt_c2 = select(Consultation).where(Consultation.consultation_code == code)
+    c_after = (await db_session.execute(stmt_c2)).scalar_one()
+    assert c_after.status == ConsultationStatus.PAYMENT_FAILED
+
+    stmt_p = select(Payment).where(Payment.provider_order_id == order_id)
+    p_after = (await db_session.execute(stmt_p)).scalar_one()
+    assert p_after.status == PaymentStatus.FAILED
+
+    # Confirm audit trail
+    stmt_audit = (
+        select(AuditLog)
+        .where(AuditLog.consultation_id == c_after.id, AuditLog.event == AuditEvent.PAYMENT_FAILED)
+    )
+    audit = (await db_session.execute(stmt_audit)).scalar_one()
+    assert audit.log_metadata.get("error_code") == "BAD_REQUEST_ERROR"
+    assert audit.log_metadata.get("reported_by") == "frontend_checkout"
+
+
+@pytest.mark.asyncio
+async def test_report_payment_failure_does_not_downgrade_successful_payment(
+    client: AsyncClient, db_session: AsyncSession
+):
+    """
+    Verifies monotonic state protection:
+    If a consultation is already in PAYMENT_SUCCESS, a late or erroneous client failure report
+    does NOT downgrade or alter the confirmed payment status.
+    """
+    create_res = await client.post(
+        "/api/v1/consultations",
+        json={
+            "customer_name": "Monotonic Safety Client",
+            "email": "monotonic@atelier.luxury",
+            "phone": "+91 98444 77777",
+            "address": "Eaton Square, London",
+            "package_id": "styleora_signature_blueprint",
+        },
+    )
+    code = create_res.json()["data"]["consultation_code"]
+
+    order_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    order_id = order_res.json()["data"]["order_id"]
+    payment_id = f"pay_mono_{uuid.uuid4().hex[:10]}"
+    sig = make_payment_signature(order_id, payment_id)
+
+    # Successfully verify
+    await client.post(
+        "/api/v1/payments/verify",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "razorpay_payment_id": payment_id,
+            "razorpay_signature": sig,
+        },
+    )
+
+    # Late failure report arrives
+    fail_res = await client.post(
+        "/api/v1/payments/fail",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order_id,
+            "error_code": "LATE_CLIENT_DROP",
+            "error_description": "Network dropped after user paid.",
+        },
+    )
+    assert fail_res.status_code == 200
+    assert fail_res.json()["data"]["status"] == "PAYMENT_SUCCESS"
+
+    # Verify status in database remains PAYMENT_SUCCESS
+    stmt_c = select(Consultation).where(Consultation.consultation_code == code)
+    c = (await db_session.execute(stmt_c)).scalar_one()
+    assert c.status == ConsultationStatus.PAYMENT_SUCCESS
+
+
+@pytest.mark.asyncio
+async def test_payment_order_recreation_after_failure(
+    client: AsyncClient, db_session: AsyncSession
+):
+    """
+    Verifies that when a consultation is in PAYMENT_FAILED status, requesting a new payment order:
+    1. Succeeds and creates a new Razorpay order.
+    2. Transitions the consultation status back to PAYMENT_PENDING.
+    """
+    create_res = await client.post(
+        "/api/v1/consultations",
+        json={
+            "customer_name": "Retry Client",
+            "email": "retry_client@atelier.luxury",
+            "phone": "+91 98555 88888",
+            "address": "Bond Street, London",
+            "package_id": "styleora_signature_blueprint",
+        },
+    )
+    code = create_res.json()["data"]["consultation_code"]
+
+    # Initial order and mark as failed
+    order1_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    order1_id = order1_res.json()["data"]["order_id"]
+
+    await client.post(
+        "/api/v1/payments/fail",
+        json={
+            "consultation_code": code,
+            "razorpay_order_id": order1_id,
+            "error_code": "USER_ABORTED",
+            "error_description": "User cancelled checkout.",
+        },
+    )
+
+    # Verify status is PAYMENT_FAILED
+    stmt_c = select(Consultation).where(Consultation.consultation_code == code)
+    c1 = (await db_session.execute(stmt_c)).scalar_one()
+    assert c1.status == ConsultationStatus.PAYMENT_FAILED
+
+    # Request new checkout order
+    order2_res = await client.post("/api/v1/payments/orders", json={"consultation_code": code})
+    assert order2_res.status_code == 201
+    order2_id = order2_res.json()["data"]["order_id"]
+    assert order2_id != order1_id
+
+    # Verify consultation transitioned back to PAYMENT_PENDING
+    stmt_c2 = select(Consultation).where(Consultation.consultation_code == code)
+    c2 = (await db_session.execute(stmt_c2)).scalar_one()
+    assert c2.status == ConsultationStatus.PAYMENT_PENDING
+
