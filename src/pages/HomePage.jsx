@@ -50,14 +50,14 @@ export const HomePage = () => {
       />
       <div className="flex flex-col">
         <HeroSection health={health} loading={loading} />
+        <StyleoraLookEdit />
+        <ClientStoriesSection />
         <BrandPositioningSection />
         <StatsSection />
-        <StyleoraLookEdit />
         <HowItWorksSection />
         <DimensionsSection />
         {/* <AtelierSculptureSection /> */}
         <BlueprintDeliverableSection />
-        <ClientStoriesSection />
         <StylistAtelierSection />
         <PackagesSection />
         <HomeFaqSection />

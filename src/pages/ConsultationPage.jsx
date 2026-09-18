@@ -888,13 +888,13 @@ export const ConsultationPage = () => {
               </div>
 
               {/* STEP 3: Client Profile Reservation Form */}
-              <div className="bg-charcoal border border-border-subtle p-8 sm:p-12 mb-16 shadow-ambient">
                 <div className="flex items-center gap-3 mb-8">
                   <span className="font-cinzel text-xs text-muted-gold tracking-widest uppercase">
                     STEP 03 // CLIENT STYLING DOSSIER & PROFILE
                   </span>
                   <div className="h-px bg-border-subtle flex-1" />
                 </div>
+              <div className="bg-charcoal border border-border-subtle p-8 sm:p-12 mb-16 shadow-ambient">
 
                 {/* Server Error Alert Banner */}
                 {serverError && (

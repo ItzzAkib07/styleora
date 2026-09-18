@@ -17,6 +17,19 @@ export const SEO = ({
       document.head.appendChild(metaDescription);
     }
     metaDescription.setAttribute('content', description);
+
+    // Guarantee Favicon is present and active across SPA route navigations
+    let favicon = document.querySelector("link[rel='icon']");
+    if (!favicon) {
+      favicon = document.createElement('link');
+      favicon.setAttribute('rel', 'icon');
+      favicon.setAttribute('type', 'image/svg+xml');
+      favicon.setAttribute('href', '/favicon.svg');
+      document.head.appendChild(favicon);
+    } else {
+      favicon.setAttribute('type', 'image/svg+xml');
+      favicon.setAttribute('href', '/favicon.svg');
+    }
   }, [title, description]);
 
   return null;

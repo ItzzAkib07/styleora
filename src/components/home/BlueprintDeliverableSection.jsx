@@ -133,7 +133,7 @@ export const BlueprintDeliverableSection = () => {
 
               <div className="mt-4 pt-3 border-t border-border-subtle flex justify-between items-center text-xs text-stone">
                 <span>Format: Ultra-HD Digital Dossier</span>
-                <span className="text-warm-ivory font-medium">Delivered in 5 Business Days</span>
+                <span className="text-warm-ivory font-medium">Delivered Same Day</span>
               </div>
             </Card>
           </div>

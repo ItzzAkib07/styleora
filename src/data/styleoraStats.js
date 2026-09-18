@@ -15,7 +15,7 @@ export const STYLEORA_STATS = [
     suffix: '+',
     formatted: '20+',
     label: 'Clients Styled',
-    eyebrow: 'METRIC 01 // SCALE & TRUST',
+    eyebrow: 'SCALE & TRUST',
     narrative: 'Discerning professionals and individuals guided to intentional, enduring personal style.',
   },
   {
@@ -24,7 +24,7 @@ export const STYLEORA_STATS = [
     suffix: '+',
     formatted: '2+',
     label: 'Countries Served',
-    eyebrow: 'METRIC 02 // GLOBAL ATELIER',
+    eyebrow: 'GLOBAL ATELIER',
     narrative: 'Private digital consultations conducted across international metropolitan design capitals.',
   },
   {
@@ -33,7 +33,7 @@ export const STYLEORA_STATS = [
     suffix: '',
     formatted: '20',
     label: 'Outfit Formulas',
-    eyebrow: 'METRIC 03 // ARCHITECTURAL CURATION',
+    eyebrow: 'ARCHITECTURAL CURATION',
     narrative: 'Bespoke ensembles curated per blueprint covering professional, casual, outings & festive occasions.',
   },
   {
@@ -42,7 +42,7 @@ export const STYLEORA_STATS = [
     suffix: '',
     formatted: '10',
     label: 'Clients Per Week',
-    eyebrow: 'METRIC 04 // PRIVATE DISCRETION',
+    eyebrow: 'PRIVATE DISCRETION',
     narrative: 'A strictly capped weekly client intake to guarantee painstaking stylist preparation.',
   },
 ];

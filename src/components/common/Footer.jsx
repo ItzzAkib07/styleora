@@ -102,7 +102,7 @@ export const Footer = () => {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center gap-5 text-[0.78rem] text-stone-dark">
           <p>© {new Date().getFullYear()} STYLEORA. All rights reserved.</p>
-          <DeveloperCredit />
+          {/* <DeveloperCredit /> */}
         </div>
       </div>
     </footer>

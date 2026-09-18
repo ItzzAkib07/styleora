@@ -76,17 +76,6 @@ export const Header = () => {
             })}
           </nav>
 
-          {/* Desktop CTA Action */}
-          <div className="hidden min-[1024px]:flex items-center gap-4 xl:gap-6">
-            <Link
-              to={ROUTES.CONSULTATION}
-              className="inline-flex items-center gap-2 px-4 xl:px-5 py-2.5 bg-champagne text-obsidian text-[0.78rem] tracking-[0.14em] font-semibold uppercase transition-all duration-300 hover:bg-warm-ivory hover:-translate-y-0.5 whitespace-nowrap"
-            >
-              <span>Book Consultation</span>
-              <ArrowUpRight size={14} />
-            </Link>
-          </div>
-
           {/* Mobile Menu Toggle Button */}
           <button
             type="button"
